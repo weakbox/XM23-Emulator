@@ -9,6 +9,9 @@
 // Macros to determine the values of certain bits in the instruction register (these can be simplified and reduced):
 
 #define branch_off(x)	(x >> 9 & 0x03FF)
+#define OFFSET_BRANCH_COND(x) (x >> 9 & 0x03FF)
+#define OFFSET_BRANCH_LINK(x) ((x >> 12) & 0x1FFF)
+
 #define branch_pc(x)	(x >> 9 & 0x03FF)
 
 #define arith_rc(x)		(x >> 7 & 0x01)
@@ -25,6 +28,11 @@
 #define wb(x)			(x >> 6 & 0x01)
 #define source(x)		(x >> 3 & 0x07)
 #define dest(x)			(x      & 0x07)
+
+#define WB(x)			(x >> 6 & 0x01)
+#define SOURCE(x)		(x >> 3 & 0x07)
+#define DEST(x)			(x      & 0x07)
+#define RC(x)			(x >> 7 & 0x01)
 
 #define prpo(x)			(x >> 9 & 0x01)
 #define dec(x)			(x >> 8 & 0x01)
@@ -339,92 +347,109 @@ void execute(unsigned short ir, unsigned short pc)
 
 	switch (decode(ir))
 	{
-		// Branch cases:
-		case BL:
+		case BL:	// Branch unconditionally. Store return address in link register.
+			branch_link(OFFSET_BRANCH_LINK(ir));
 			break;
 
-		case BEQBZ:
+		case BEQBZ:		// Branch if PSW's zero bit is set.
 			print_branch("BEQBZ", ir, pc);
+			branch_conditional(psw.zero, 1, OFFSET_BRANCH_COND(ir));
 			break;
 
-		case BNEBNZ:
+		case BNEBNZ:	// Branch if PSW's zero bit is cleared.
 			print_branch("BNEBNZ", ir, pc);
+			branch_conditional(psw.zero, 0, OFFSET_BRANCH_COND(ir));
 			break;
 
-		case BCBHS:
+		case BCBHS:		// Branch if PSW's carry bit is set.
 			print_branch("BCBHS", ir, pc);
+			branch_conditional(psw.carry, 1, OFFSET_BRANCH_COND(ir));
 			break;
 
-		case BNCBLO:
+		case BNCBLO:	// Branch if PSW's carry bit is cleared.
 			print_branch("BNCBLO", ir, pc);
+			branch_conditional(psw.carry, 0, OFFSET_BRANCH_COND(ir));
 			break;
 
-		case BN:
+		case BN:		// Branch if PSW's negative bit is set.
 			print_branch("BN", ir, pc);
+			branch_conditional(psw.negative, 1, OFFSET_BRANCH_COND(ir));
 			break;
 
-		case BGE:
+		case BGE:		// Branch if PSW's negative and overflow bit is cleared.
 			print_branch("BGE", ir, pc);
+			branch_conditional((psw.negative || psw.overflow), 0, OFFSET_BRANCH_COND(ir));
 			break;
 
-		case BLT:
+		case BLT:		// Branch if PSW's negative or overflow bit is set.
 			print_branch("BLT", ir, pc);
+			branch_conditional((psw.negative || psw.overflow), 1, OFFSET_BRANCH_COND(ir));
 			break;
 
-		case BRA:
+		case BRA:		// Branch unconditionally.
 			print_branch("BRA", ir, pc);
+			branch_conditional(1, 1, OFFSET_BRANCH_COND(ir));
 			break;
 
-		// Arithmetic cases:
-		case ADD:
+		case ADD:	// Add source to destination.
 			print_arith("ADD", ir);
+			regfile[0][DEST(ir)] = add(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], 0, WB(ir));
 			break;
 
-		case ADDC:
+		case ADDC:	// Add source + carry to destination.
 			print_arith("ADDC", ir);
+			regfile[0][DEST(ir)] = add(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], psw.carry, WB(ir));
 			break;
 
-		case SUB:
+		case SUB:	// Subtract source from destination (uses two's complement subtraction).
 			print_arith("SUB", ir);
+			regfile[0][DEST(ir)] = add(regfile[0][DEST(ir)], (~regfile[RC(ir)][SOURCE(ir)] + 1), 0, WB(ir));
 			break;
 
-		case SUBC:
+		case SUBC:	// Subtract source + carry from destination (uses two's complement subtraction).
 			print_arith("SUBC", ir);
+			regfile[0][DEST(ir)] = add(regfile[0][DEST(ir)], (~regfile[RC(ir)][SOURCE(ir)]), psw.carry, WB(ir));
 			break;
 
-		case DADD:
+		case DADD:	// Decimal-add source + carry to destination.
 			print_arith("DADD", ir);
 			break;
 
-		case CMP:
+		case CMP:	// Compare source with destination.
 			print_arith("CMP", ir);
+			compare(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], WB(ir));
 			break;
 
-		case XOR:
+		case XOR:	// XOR's source with destination.
 			print_arith("XOR", ir);
+			regfile[0][DEST(ir)] = xor(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], WB(ir));
 			break;
 
-		case AND:
+		case AND:	// AND's source with destination.
 			print_arith("AND", ir);
+			regfile[0][DEST(ir)] = and(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], WB(ir));
 			break;
 
-		case OR:
+		case OR:	// OR's source with destination.
 			print_arith("OR", ir);
+			regfile[0][DEST(ir)] = or(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], WB(ir));
 			break;
 
-		case BIT:
+		case BIT:	// Test if bit set in source is set in destination.
 			print_arith("BIT", ir);
+			compare_bit(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], WB(ir));
 			break;
 
-		case BIC:
+		case BIC:	// Clear bit in destination specified by source.
 			print_arith("BIC", ir);
+			regfile[0][DEST(ir)] = clear_bit(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], WB(ir));
 			break;
 
-		case BIS:
+		case BIS:	// Set bit in destination specified by source.
 			print_arith("BIS", ir);
+			regfile[0][DEST(ir)] = set_bit(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], WB(ir));
 			break;
 
-		// Load/store cases:
 		case LD:
 			print_load("LD", ir);
 			load(&regfile[0][dest(ir)], &regfile[0][source(ir)], prpo(ir), dec(ir), inc(ir), wb(ir));

@@ -97,3 +97,19 @@ extern void load_rel(unsigned short* dest, unsigned short source, short offset, 
 extern void update_psw(unsigned short dest, unsigned short source, unsigned short result, unsigned short wb);
 extern unsigned short combine_bytes(unsigned short msb, unsigned short lsb);
 extern void print_psw();
+
+
+
+// Instruction functions:
+
+extern void branch_conditional(unsigned short condition, unsigned short expected, unsigned short offset);
+extern void branch_link(unsigned short offset);
+extern unsigned short add(unsigned short dest, unsigned short source, unsigned short carry, unsigned short wb);
+extern void compare(unsigned short dest, unsigned short source, unsigned short wb);
+extern unsigned short xor(unsigned short dest, unsigned short source, unsigned short wb);
+extern unsigned short and(unsigned short dest, unsigned short source, unsigned short wb);
+extern unsigned short or (unsigned short dest, unsigned short source, unsigned short wb);
+extern void compare_bit(unsigned short dest, unsigned short source, unsigned short wb);
+extern unsigned short set_bit(unsigned short dest, unsigned short source, unsigned short wb);
+extern unsigned short clear_bit(unsigned short dest, unsigned short source, unsigned short wb);
+
