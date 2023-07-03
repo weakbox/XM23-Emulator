@@ -34,6 +34,12 @@
 #define DATA_OFFSET 8
 #define CHECKSUM_OFFSET 2
 
+// Registers and variables relevent to the operation of the CPU (needs updating).
+typedef struct _CPU
+{
+	unsigned int clock;
+}	CPU;
+
 // Combines word and byte addressing into one union, where data will be written to a shared space in memory.
 typedef union _Memory {
 	unsigned char byte[MEMORY_SIZE];		/* Each address of memory contains 1 byte. */
@@ -46,7 +52,7 @@ typedef struct _PSW
 	unsigned short carry:1;
 	unsigned short zero:1;
 	unsigned short negative:1;
-	unsigned short slp:1;
+	unsigned short sleep:1;
 	unsigned short overflow:1;
 	unsigned short current:3; /* Current priority */
 	unsigned short faulting:1; /* 0 - No fault; 1 - Active fault */
@@ -57,6 +63,7 @@ typedef struct _PSW
 // Emulated system memory is defined as a global that is initialized in main.c
 extern Memory mem;
 extern PSW psw;
+extern CPU cpu;
 
 extern unsigned short regfile[2][8];
 
@@ -117,5 +124,7 @@ extern void store_rel(unsigned short dest, unsigned short source, short offset, 
 extern unsigned short move(unsigned short dest, unsigned short source, unsigned short wb);
 extern void swap_reg(unsigned short* dest, unsigned short* source);
 extern unsigned short complement(unsigned short dest, unsigned short wb);
-
+extern unsigned short swap_byte(unsigned short dest);
 extern unsigned short sign_extend(unsigned short dest);
+extern void store(unsigned short* dest, unsigned short source, unsigned short prpo, unsigned short dec, unsigned short inc, unsigned short wb);
+extern void store_rel(unsigned short dest, unsigned short source, short offset, unsigned short wb);

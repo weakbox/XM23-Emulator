@@ -1,3 +1,2 @@
-﻿  memory.c
-C:\Users\conno\Desktop\XM-23 Emulator\memory.c(164,35): warning C4018: '<': signed/unsigned mismatch
+﻿  decode.c
   XM-23 Emulator.vcxproj -> C:\Users\conno\Desktop\XM-23 Emulator\x64\Debug\XM-23 Emulator.exe

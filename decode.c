@@ -1,132 +1,55 @@
 /*
-*	Functions and definitions related to the decoding and execution process (Lab 2).
-*	Written by Connor McLeod, for ECED 3403.
+  File: decode.c
+  Author: Connor McLeod
+  Creation Date: July 3, 2023
+  Description: Executes and decodes the value of the instruction register.
 */
 
 #include "header.h"
 #include "instructions.h"
 
-// Macros to determine the values of certain bits in the instruction register (these can be simplified and reduced):
+// Isolates specific bits present in the instruction register.
+// These definitions allow the emulator to decode the opcode present in the instruction register.
+#define BITS_15_AND_14(x)	((x >> 14) & 0x03)
+#define BIT_13(x)			((x >> 13) & 0x01)
+#define BITS_12_AND_11(x)	((x >> 11) & 0x03)
+#define BITS_12_TO_10(x)	((x >> 10) & 0x07)
+#define BIT_10(x)			((x >> 10) & 0x01)
+#define BITS_9_AND_8(x)		((x >> 8)  & 0x03)
+#define BITS_9_TO_7(x)		((x >> 7)  & 0x07)
+#define BITS_6_AND_5(x)		((x >> 5)  & 0x03)
+#define BITS_5_TO_3(x)		((x >> 3)  & 0x07)
 
-#define branch_off(x)	(x >> 9 & 0x03FF)
-#define OFFSET_BRANCH_COND(x) (x >> 9 & 0x03FF)
-#define OFFSET_BRANCH_LINK(x) ((x >> 12) & 0x1FFF)
+// Isolates specific bits present in the instruction register.
+// These definitions allow the emulator to extract parameters from the instruction register.
+#define OFFSET_BRANCH_LINK(x)		((x >> 12) & 0x1FFF)
+#define OFFSET_BRANCH_COND(x)		((x >> 9)  & 0x03FF)
+#define RC(x)						((x >> 7)  & 0x01)
+#define WB(x)						((x >> 6)  & 0x01)
+#define SOURCE(x)					((x >> 3)  & 0x07)
+#define DEST(x)						((x)       & 0x07)
+#define PRPO(x)						((x >> 9)  & 0x01)
+#define DEC(x)						((x >> 8)  & 0x01)
+#define INC(x)						((x >> 7)  & 0x01)
+#define BYTE_MOV(x)					((x >> 3)  & 0xFF)
+#define OFFSET_LOAD_STORE_REL(x)	((x >> 7)  & 0x7F)
 
-#define branch_pc(x)	(x >> 9 & 0x03FF)
-
-#define arith_rc(x)		(x >> 7 & 0x01)
-#define arith_wb(x)		(x >> 6 & 0x01)
-#define arith_source(x) (x >> 3 & 0x07)
-#define arith_dest(x)	(x      & 0x07)
-
-#define move_byte(x)	(x >> 3 & 0xFF)
-#define move_dest(x)	(x      & 0x07)
-
-#define high_byte(x)	(x >> 8 & 0xFF)
-#define low_byte(x)		(x      & 0xFF)
-
-#define wb(x)			(x >> 6 & 0x01)
-#define source(x)		(x >> 3 & 0x07)
-#define dest(x)			(x      & 0x07)
-
-#define WB(x)			(x >> 6 & 0x01)
-#define SOURCE(x)		(x >> 3 & 0x07)
-#define DEST(x)			(x      & 0x07)
-#define RC(x)			(x >> 7 & 0x01)
-
-#define prpo(x)			(x >> 9 & 0x01)
-#define dec(x)			(x >> 8 & 0x01)
-#define inc(x)			(x >> 7 & 0x01)
-
-#define loadrel_off(x)	(x >> 7 & 0x7F)
-
-// Macro definitions for various bits in the ir to allow the get_instruction_code function to determine the correct instruction in the instruction register.
-
-#define bits15_14(x)	(x >> 14 & 0x03)
-#define bit13(x)		(x >> 13 & 0x01)
-#define bits12_11(x)	(x >> 11 & 0x03)
-#define bits12_11_10(x)	(x >> 10 & 0x07)
-#define bit10(x)		(x >> 10 & 0x01)
-#define bits9_8(x)		(x >> 8  & 0x03)
-#define bits9_8_7(x)	(x >> 7  & 0x07)
-#define bits6_5(x)		(x >> 5  & 0x03)
-#define bits5_4_3(x)	(x >> 3  & 0x07)
-
-// Prints the variables of the branch instruction currently stored in the instruction register.
-void print_branch(const char* name, unsigned short ir, unsigned short pc)
-{
-	printf("Instruction: %s\n", name);
-	printf("Encoded offset: 0x%x\n", branch_off(ir));
-	printf("Current PC: 0x%x\n", pc);
-	printf("Branch PC: 0x%x\n", (pc + branch_pc(ir)));
-}
-
-// Prints the variables of the arithmetic instruction currently stored in the instruction register.
-void print_arith(const char* name, unsigned short ir)
-{
-	printf("Instruction: %s\n", name);
-	printf("R/C: 0x%x\n", arith_rc(ir));
-	printf("W/B: 0x%x\n", arith_wb(ir));
-	printf("Source: 0x%02x\n", arith_source(ir));
-	printf("Destination: 0x%02x\n", arith_dest(ir));
-}
-
-// Prints the variables of the load instruction currently stored in the instruction register.
-void print_load(const char* name, unsigned short ir)
-{
-	printf("Instruction: %s\n", name);
-	printf("PR/PO: 0x%x\n", prpo(ir));
-	printf("Decrement: 0x%x\n", dec(ir));
-	printf("Increment: 0x%x\n", inc(ir));
-	printf("W/B: 0x%x\n", wb(ir));
-	printf("Source: 0x%02x\n", source(ir));
-	printf("Destination: 0x%02x\n", dest(ir));
-}
-
-// Prints the variables of the move instruction currently stored in the instruction register.
-void print_move(const char* name, unsigned short ir)
-{
-	printf("Instruction: %s\n", name);
-	printf("Byte: 0x%02x\n", move_byte(ir));
-	printf("Destination: 0x%02x\n", move_dest(ir));
-}
-
-// Prints the variables of the load relative instruction currently stored in the instruction register.
-void print_loadrel(const char* name, unsigned short ir)
-{
-	printf("Instruction: %s\n", name);
-	printf("Offset: %i\n", sign_extend_offset(loadrel_off(ir)));
-	printf("W/B: 0x%x\n", wb(ir));
-	printf("Source: 0x%02x\n", source(ir));
-	printf("Destination: 0x%02x\n", dest(ir));
-}
-
-// Sign extends the 7 bit offset value of the load relative instruction (can this be done in a more clever way?).
-short sign_extend_offset(unsigned short offset)
-{
-	short sext_offset = offset;
-	if (offset >> 6 == 1)	/* If the MSBit is high, then the offset is negative. */
-	{
-		sext_offset = (offset | 0xFF80);
-	}
-	return sext_offset;
-}
-
-// Determines the macro code of the particular instruction currently stored in the instruction register. Returns an integer value that corresponds with the given instruction.
+// Determines the macro code of the particular instruction currently stored in the instruction register.
+// Returns an integer value that corresponds with the given instruction.
 int decode(unsigned short ir)
 {
 	int inst = 0;
-	switch (bits15_14(ir))
+	switch (BITS_15_AND_14(ir))
 	{
 		case 0:
-			switch (bit13(ir))
+			switch (BIT_13(ir))
 			{
 				case 0:
 					inst = BL;
 					break;
 
-				case 1:	/* Branch block: */
-					switch (bits12_11_10(ir))
+				case 1:
+					switch (BITS_12_TO_10(ir))
 					{
 						case 0:
 							inst = BEQBZ;
@@ -165,13 +88,13 @@ int decode(unsigned short ir)
 			break;
 
 		case 1:
-			switch (bit13(ir))
+			switch (BIT_13(ir))
 			{
 			case 0:
-				switch (bits12_11_10(ir))
+				switch (BITS_12_TO_10(ir))
 				{
 					case 0:
-						switch (bits9_8(ir))
+						switch (BITS_9_AND_8(ir))
 						{
 							case 0:
 								inst = ADD;
@@ -192,7 +115,7 @@ int decode(unsigned short ir)
 						break;
 
 					case 1:
-						switch (bits9_8(ir))
+						switch (BITS_9_AND_8(ir))
 						{
 							case 0:
 								inst = DADD;
@@ -213,7 +136,7 @@ int decode(unsigned short ir)
 						break;
 
 					case 2:
-						switch (bits9_8(ir))
+						switch (BITS_9_AND_8(ir))
 						{
 							case 0:
 								inst = OR;
@@ -233,8 +156,8 @@ int decode(unsigned short ir)
 						}
 						break;
 
-					case 3:	/* Strange instruction block: */
-						switch (bits9_8_7(ir))
+					case 3:
+						switch (BITS_9_TO_7(ir))
 						{
 							case 0:
 								inst = MOV;
@@ -245,7 +168,7 @@ int decode(unsigned short ir)
 								break;
 
 							case 2:
-								switch (bits5_4_3(ir))
+								switch (BITS_5_TO_3(ir))
 								{
 									case 0:
 										inst = SRA;
@@ -270,7 +193,7 @@ int decode(unsigned short ir)
 								break;
 
 							case 3:
-								switch (bits6_5(ir))
+								switch (BITS_6_AND_5(ir))
 								{
 									case 0:
 										inst = SETPRI;
@@ -306,8 +229,8 @@ int decode(unsigned short ir)
 				}
 				break;
 
-			case 1:	/* Move byte instruction block: */
-				switch(bits12_11(ir))
+			case 1:
+				switch(BITS_12_AND_11(ir))
 				{
 					case 0:
 						inst = MOVL;
@@ -340,121 +263,101 @@ int decode(unsigned short ir)
 	return inst;
 }
 
-// Executes the instruction corrently stored in the instruction register.
+// Executes the instruction stored in the instruction register.
 void execute(unsigned short ir, unsigned short pc)
 {
 	printf("Instruction Register: %04x\n", ir);
 
 	switch (decode(ir))
 	{
-		case BL:	// Branch unconditionally. Store return address in link register.
+		case BL: // Branch unconditionally. Store return address in link register.
 			branch_link(OFFSET_BRANCH_LINK(ir));
 			break;
 
-		case BEQBZ:		// Branch if PSW's zero bit is set.
-			print_branch("BEQBZ", ir, pc);
+		case BEQBZ: // Branch if PSW's zero bit is set.
 			branch_conditional(psw.zero, 1, OFFSET_BRANCH_COND(ir));
 			break;
 
-		case BNEBNZ:	// Branch if PSW's zero bit is cleared.
-			print_branch("BNEBNZ", ir, pc);
+		case BNEBNZ: // Branch if PSW's zero bit is cleared.
 			branch_conditional(psw.zero, 0, OFFSET_BRANCH_COND(ir));
 			break;
 
-		case BCBHS:		// Branch if PSW's carry bit is set.
-			print_branch("BCBHS", ir, pc);
+		case BCBHS: // Branch if PSW's carry bit is set.
 			branch_conditional(psw.carry, 1, OFFSET_BRANCH_COND(ir));
 			break;
 
-		case BNCBLO:	// Branch if PSW's carry bit is cleared.
-			print_branch("BNCBLO", ir, pc);
+		case BNCBLO: // Branch if PSW's carry bit is cleared.
 			branch_conditional(psw.carry, 0, OFFSET_BRANCH_COND(ir));
 			break;
 
-		case BN:		// Branch if PSW's negative bit is set.
-			print_branch("BN", ir, pc);
+		case BN: // Branch if PSW's negative bit is set.
 			branch_conditional(psw.negative, 1, OFFSET_BRANCH_COND(ir));
 			break;
 
-		case BGE:		// Branch if PSW's negative and overflow bit is cleared.
-			print_branch("BGE", ir, pc);
+		case BGE: // Branch if PSW's negative and overflow bit is cleared.
 			branch_conditional((psw.negative || psw.overflow), 0, OFFSET_BRANCH_COND(ir));
 			break;
 
-		case BLT:		// Branch if PSW's negative or overflow bit is set.
-			print_branch("BLT", ir, pc);
+		case BLT: // Branch if PSW's negative or overflow bit is set.
 			branch_conditional((psw.negative || psw.overflow), 1, OFFSET_BRANCH_COND(ir));
 			break;
 
-		case BRA:		// Branch unconditionally.
-			print_branch("BRA", ir, pc);
+		case BRA: // Branch unconditionally.
 			branch_conditional(1, 1, OFFSET_BRANCH_COND(ir));
 			break;
 
-		case ADD:	// Add source to destination.
-			print_arith("ADD", ir);
+		case ADD: // Add source to destination.
 			regfile[0][DEST(ir)] = add(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], 0, WB(ir));
 			break;
 
-		case ADDC:	// Add source + carry to destination.
-			print_arith("ADDC", ir);
+		case ADDC: // Add source + carry to destination.
 			regfile[0][DEST(ir)] = add(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], psw.carry, WB(ir));
 			break;
 
-		case SUB:	// Subtract source from destination (uses two's complement subtraction).
-			print_arith("SUB", ir);
+		case SUB: // Subtract source from destination (uses two's complement subtraction).
 			regfile[0][DEST(ir)] = add(regfile[0][DEST(ir)], (~regfile[RC(ir)][SOURCE(ir)] + 1), 0, WB(ir));
 			break;
 
-		case SUBC:	// Subtract source + carry from destination (uses two's complement subtraction).
-			print_arith("SUBC", ir);
+		case SUBC: // Subtract source + carry from destination (uses two's complement subtraction).
 			regfile[0][DEST(ir)] = add(regfile[0][DEST(ir)], (~regfile[RC(ir)][SOURCE(ir)]), psw.carry, WB(ir));
 			break;
 
-		case DADD:	// Decimal-add source + carry to destination.
-			print_arith("DADD", ir);
+		case DADD: // Decimal-add source + carry to destination.
 			break;
 
-		case CMP:	// Compare source with destination.
-			print_arith("CMP", ir);
+		case CMP: // Compare source with destination.
 			compare(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], WB(ir));
 			break;
 
-		case XOR:	// XOR's source with destination.
-			print_arith("XOR", ir);
+		case XOR: // XOR's source with destination.
 			regfile[0][DEST(ir)] = xor(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], WB(ir));
 			break;
 
-		case AND:	// AND's source with destination.
-			print_arith("AND", ir);
+		case AND: // AND's source with destination.
 			regfile[0][DEST(ir)] = and(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], WB(ir));
 			break;
 
-		case OR:	// OR's source with destination.
-			print_arith("OR", ir);
+		case OR: // OR's source with destination.
 			regfile[0][DEST(ir)] = or(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], WB(ir));
 			break;
 
-		case BIT:	// Test if bit set in source is set in destination.
-			print_arith("BIT", ir);
+		case BIT: // Test if bit set in source is set in destination.
 			compare_bit(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], WB(ir));
 			break;
 
-		case BIC:	// Clear bit in destination specified by source.
-			print_arith("BIC", ir);
+		case BIC: // Clear bit in destination specified by source.
 			regfile[0][DEST(ir)] = clear_bit(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], WB(ir));
 			break;
 
-		case BIS:	// Set bit in destination specified by source.
-			print_arith("BIS", ir);
+		case BIS: // Set bit in destination specified by source.
 			regfile[0][DEST(ir)] = set_bit(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], WB(ir));
 			break;
 
-		case MOV:	// Copies source into destination.
+		case MOV: // Copies source into destination.
 			regfile[0][DEST(ir)] = move(regfile[0][DEST(ir)], regfile[0][SOURCE(ir)], WB(ir));
 			break;
 
-		case SWAP:	// Swaps source and destination registers.
+		case SWAP: // Swaps source and destination registers.
 			swap_reg(&regfile[0][DEST(ir)], &regfile[0][SOURCE(ir)]);
 			break;
 
@@ -464,52 +367,52 @@ void execute(unsigned short ir, unsigned short pc)
 		case RRC:
 			break;
 
-		case COMP:	// One's complements destination.
+		case COMP: // One's complements destination.
 			regfile[0][DEST(ir)] = complement(regfile[0][DEST(ir)], WB(ir));
 			break;
 
-		case SWPB:
+		case SWPB: // Swaps the most and least significant bytes in the destination.
+			regfile[0][DEST(ir)] = swap_byte(regfile[0][DEST(ir)]);
 			break;
 
-		case SXT:	// Sign extends destination.
+		case SXT: // Sign extends destination.
 			regfile[0][DEST(ir)] = sign_extend(regfile[0][DEST(ir)]);
 			break;
 
-		case LD:
-			print_load("LD", ir);
-			load(&regfile[0][dest(ir)], &regfile[0][source(ir)], prpo(ir), dec(ir), inc(ir), wb(ir));
+		case LD: // Loads data from memory into the destination register at an address specified by the source register.
+			load(&regfile[0][DEST(ir)], &regfile[0][SOURCE(ir)], PRPO(ir), DEC(ir), INC(ir), WB(ir));
 			break;
 
-		case ST:
-			print_load("ST", ir);
-
-		case MOVL:
-			print_move("MOVL", ir);
-			move_bytes(&regfile[0][DEST(ir)], high_byte(regfile[0][move_dest(ir)]), move_byte(ir));
+		case ST: // Stores value of the source register into memory at an address specified by the destination register.
+			store(&regfile[0][DEST(ir)], regfile[0][SOURCE(ir)], PRPO(ir), DEC(ir), INC(ir), WB(ir));
 			break;
 
-		case MOVLZ:
-			print_move("MOVLZ", ir);
-			move_bytes(&regfile[0][DEST(ir)], 0x00, move_byte(ir));
+		case MOVL: // Moves a byte into the LSByte of the destination. Does not modify the MSByte.
+			move_bytes(&regfile[0][DEST(ir)], MSBYTE(regfile[0][DEST(ir)]), BYTE_MOV(ir));
 			break;
 
-		case MOVLS:
-			print_move("MOVLS", ir);
-			move_bytes(&regfile[0][DEST(ir)], 0xFF, move_byte(ir));
+		case MOVLZ: // Moves a byte into the LSByte of the destination. The MSByte is zeroed.
+			move_bytes(&regfile[0][DEST(ir)], 0x00,BYTE_MOV(ir));
 			break;
 
-		case MOVH:
-			print_move("MOVH", ir);
-			move_bytes(&regfile[0][DEST(ir)], move_byte(ir), low_byte(regfile[0][DEST(ir)]));
+		case MOVLS: // Moves a byte into the LSByte of the destination. The MSByte is assigned 0xFF.
+			move_bytes(&regfile[0][DEST(ir)], 0xFF, BYTE_MOV(ir));
 			break;
 
-		case LDR:
-			print_loadrel("LDR", ir);
-			load_rel(&regfile[0][DEST(ir)], regfile[0][SOURCE(ir)], sign_extend_offset(loadrel_off(ir)), wb(ir));
+		case MOVH: // Moves a byte into the MSByte of the destination. Does not modify the LSByte.
+			move_bytes(&regfile[0][DEST(ir)], BYTE_MOV(ir), LSBYTE(regfile[0][DEST(ir)]));
 			break;
 
-		case STR:
-			print_loadrel("STR", ir);
+		case LDR: // Loads data from memory into the destination register at an address specified by the source register, relative to a specified offset.
+			load_rel(&regfile[0][DEST(ir)], regfile[0][SOURCE(ir)], OFFSET_LOAD_STORE_REL(ir), WB(ir));
+			break;
+
+		case STR: // Stores value of the source register into memory at an address specified by the destination register, relative to a specified offset.
+			store_rel(regfile[0][DEST(ir)], regfile[0][SOURCE(ir)], OFFSET_LOAD_STORE_REL(ir), WB(ir));
+			break;
+
+		default: // Somehow there was an invalid instruction present in the instruction register.
+			printf("Instruction not found!\n");
 			break;
 	}
 }

@@ -8,6 +8,7 @@
 FILE* file;
 Memory mem;
 PSW psw;
+CPU cpu;
 
 // CPU Registers:
 unsigned short mar =	0;
