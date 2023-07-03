@@ -1,13 +1,3 @@
-﻿  decode.c
-  inst_2_operand.c
-  inst_misc.c
-  inst_transfer_control.c
-  instructions.c
-  main.c
-  memory.c
-C:\Users\conno\Desktop\XM-23 Emulator\memory.c(37,22): warning C4244: '=': conversion from 'unsigned short' to 'unsigned char', possible loss of data
+﻿  memory.c
 C:\Users\conno\Desktop\XM-23 Emulator\memory.c(164,35): warning C4018: '<': signed/unsigned mismatch
-  registers.c
-  utility.c
-  Generating Code...
   XM-23 Emulator.vcxproj -> C:\Users\conno\Desktop\XM-23 Emulator\x64\Debug\XM-23 Emulator.exe

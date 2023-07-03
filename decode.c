@@ -450,6 +450,31 @@ void execute(unsigned short ir, unsigned short pc)
 			regfile[0][DEST(ir)] = set_bit(regfile[0][DEST(ir)], regfile[RC(ir)][SOURCE(ir)], WB(ir));
 			break;
 
+		case MOV:	// Copies source into destination.
+			regfile[0][DEST(ir)] = move(regfile[0][DEST(ir)], regfile[0][SOURCE(ir)], WB(ir));
+			break;
+
+		case SWAP:	// Swaps source and destination registers.
+			swap_reg(&regfile[0][DEST(ir)], &regfile[0][SOURCE(ir)]);
+			break;
+
+		case SRA:
+			break;
+
+		case RRC:
+			break;
+
+		case COMP:	// One's complements destination.
+			regfile[0][DEST(ir)] = complement(regfile[0][DEST(ir)], WB(ir));
+			break;
+
+		case SWPB:
+			break;
+
+		case SXT:	// Sign extends destination.
+			regfile[0][DEST(ir)] = sign_extend(regfile[0][DEST(ir)]);
+			break;
+
 		case LD:
 			print_load("LD", ir);
 			load(&regfile[0][dest(ir)], &regfile[0][source(ir)], prpo(ir), dec(ir), inc(ir), wb(ir));
@@ -458,31 +483,29 @@ void execute(unsigned short ir, unsigned short pc)
 		case ST:
 			print_load("ST", ir);
 
-		// Move byte cases:
 		case MOVL:
 			print_move("MOVL", ir);
-			move_bytes(&regfile[0][move_dest(ir)], high_byte(regfile[0][move_dest(ir)]), move_byte(ir));
+			move_bytes(&regfile[0][DEST(ir)], high_byte(regfile[0][move_dest(ir)]), move_byte(ir));
 			break;
 
 		case MOVLZ:
 			print_move("MOVLZ", ir);
-			move_bytes(&regfile[0][move_dest(ir)], 0x00, move_byte(ir));
+			move_bytes(&regfile[0][DEST(ir)], 0x00, move_byte(ir));
 			break;
 
 		case MOVLS:
 			print_move("MOVLS", ir);
-			move_bytes(&regfile[0][move_dest(ir)], 0xFF, move_byte(ir));
+			move_bytes(&regfile[0][DEST(ir)], 0xFF, move_byte(ir));
 			break;
 
 		case MOVH:
 			print_move("MOVH", ir);
-			move_bytes(&regfile[0][move_dest(ir)], move_byte(ir), low_byte(regfile[0][move_dest(ir)]));
+			move_bytes(&regfile[0][DEST(ir)], move_byte(ir), low_byte(regfile[0][DEST(ir)]));
 			break;
 
-		// Load/store relative cases:
 		case LDR:
 			print_loadrel("LDR", ir);
-			load_rel(&regfile[0][dest(ir)], regfile[0][source(ir)], sign_extend_offset(loadrel_off(ir)), wb(ir));
+			load_rel(&regfile[0][DEST(ir)], regfile[0][SOURCE(ir)], sign_extend_offset(loadrel_off(ir)), wb(ir));
 			break;
 
 		case STR:

@@ -34,7 +34,7 @@ void bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 					break;
 
 				case BYTE:
-					mem.byte[mar] = *mbr;
+					mem.byte[mar] = (unsigned char)*mbr;
 					break;
 			}
 			break;

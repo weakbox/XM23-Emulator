@@ -112,4 +112,10 @@ extern unsigned short or (unsigned short dest, unsigned short source, unsigned s
 extern void compare_bit(unsigned short dest, unsigned short source, unsigned short wb);
 extern unsigned short set_bit(unsigned short dest, unsigned short source, unsigned short wb);
 extern unsigned short clear_bit(unsigned short dest, unsigned short source, unsigned short wb);
+extern void store(unsigned short* dest, unsigned short source, unsigned short prpo, unsigned short dec, unsigned short inc, unsigned short wb);
+extern void store_rel(unsigned short dest, unsigned short source, short offset, unsigned short wb);
+extern unsigned short move(unsigned short dest, unsigned short source, unsigned short wb);
+extern void swap_reg(unsigned short* dest, unsigned short* source);
+extern unsigned short complement(unsigned short dest, unsigned short wb);
 
+extern unsigned short sign_extend(unsigned short dest);
