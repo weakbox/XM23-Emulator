@@ -1,5 +1,5 @@
 C:\Users\conno\Desktop\XM-23 Emulator\decode.c;C:\Users\conno\Desktop\XM-23 Emulator\x64\Debug\decode.obj
-C:\Users\conno\Desktop\XM-23 Emulator\instructions.c;C:\Users\conno\Desktop\XM-23 Emulator\x64\Debug\instructions.obj
+C:\Users\conno\Desktop\XM-23 Emulator\inst_memory.c;C:\Users\conno\Desktop\XM-23 Emulator\x64\Debug\inst_memory.obj
 C:\Users\conno\Desktop\XM-23 Emulator\main.c;C:\Users\conno\Desktop\XM-23 Emulator\x64\Debug\main.obj
 C:\Users\conno\Desktop\XM-23 Emulator\memory.c;C:\Users\conno\Desktop\XM-23 Emulator\x64\Debug\memory.obj
 C:\Users\conno\Desktop\XM-23 Emulator\inst_misc.c;C:\Users\conno\Desktop\XM-23 Emulator\x64\Debug\inst_misc.obj

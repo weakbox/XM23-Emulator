@@ -128,7 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="decode.c" />
-    <ClCompile Include="instructions.c" />
+    <ClCompile Include="inst_memory.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="memory.c" />
     <ClCompile Include="inst_misc.c" />
