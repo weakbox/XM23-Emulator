@@ -39,6 +39,7 @@ void bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 			}
 			break;
 	}
+	cpu.clock += 3;
 }
 
 // Reads data directly from a specified address in memory. Used by the initial S-Record loader.

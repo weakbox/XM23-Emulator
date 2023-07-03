@@ -260,6 +260,7 @@ int decode(unsigned short ir)
 			inst = STR;
 			break;
 	}
+	cpu.clock++;
 	return inst;
 }
 
@@ -415,4 +416,5 @@ void execute(unsigned short ir, unsigned short pc)
 			printf("Instruction not found!\n");
 			break;
 	}
+	cpu.clock++;
 }

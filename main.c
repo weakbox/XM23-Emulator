@@ -32,6 +32,7 @@ void fetch()
 	bus(mar, &mbr, READ, WORD);
 	ir = mbr;
 	pc += 2;
+	cpu.clock++;
 }
 
 int main(int argv, char* argc[])
