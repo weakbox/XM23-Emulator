@@ -16,6 +16,7 @@ unsigned short cr =		0;
 unsigned short ir =		0;
 
 unsigned short pc = 0;
+unsigned short lr = 0;
 
 unsigned short regfile[2][8] = 
 { 

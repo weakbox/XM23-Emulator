@@ -60,6 +60,9 @@ extern PSW psw;
 
 extern unsigned short regfile[2][8];
 
+extern unsigned short pc;
+extern unsigned short lr;
+
 extern unsigned short mar;
 extern unsigned short mbr;
 extern unsigned short cr;

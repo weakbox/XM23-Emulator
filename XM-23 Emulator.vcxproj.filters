@@ -30,13 +30,16 @@
     <ClCompile Include="registers.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="transfer_of_control_instructions.c">
+    <ClCompile Include="inst_transfer_control.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="two_operand_instructions.c">
+    <ClCompile Include="inst_2_operand.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="utility.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="inst_misc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -44,7 +47,7 @@
     <ClInclude Include="header.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="instruction_names.h">
+    <ClInclude Include="instructions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
