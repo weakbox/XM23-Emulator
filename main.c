@@ -68,7 +68,7 @@ int main(int argv, char* argc[])
 
 	while (running)
 	{
-		printf("What would you like to do next? (Current PC = 0x%04x)\n", pc);
+		printf("What would you like to do next? (Current PC = 0x%04x) (Current CPU Clock = %i)\n", pc, cpu.clock);
 		printf("1: Continue execution\n");
 		printf("2: Change the program counter\n");
 		printf("3: Print memory\n");
