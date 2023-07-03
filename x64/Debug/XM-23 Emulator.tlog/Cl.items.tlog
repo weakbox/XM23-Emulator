@@ -1,0 +1,8 @@
+C:\Users\conno\Desktop\XM-23 Emulator\decode.c;C:\Users\conno\Desktop\XM-23 Emulator\x64\Debug\decode.obj
+C:\Users\conno\Desktop\XM-23 Emulator\instructions.c;C:\Users\conno\Desktop\XM-23 Emulator\x64\Debug\instructions.obj
+C:\Users\conno\Desktop\XM-23 Emulator\main.c;C:\Users\conno\Desktop\XM-23 Emulator\x64\Debug\main.obj
+C:\Users\conno\Desktop\XM-23 Emulator\memory.c;C:\Users\conno\Desktop\XM-23 Emulator\x64\Debug\memory.obj
+C:\Users\conno\Desktop\XM-23 Emulator\registers.c;C:\Users\conno\Desktop\XM-23 Emulator\x64\Debug\registers.obj
+C:\Users\conno\Desktop\XM-23 Emulator\transfer_of_control_instructions.c;C:\Users\conno\Desktop\XM-23 Emulator\x64\Debug\transfer_of_control_instructions.obj
+C:\Users\conno\Desktop\XM-23 Emulator\two_operand_instructions.c;C:\Users\conno\Desktop\XM-23 Emulator\x64\Debug\two_operand_instructions.obj
+C:\Users\conno\Desktop\XM-23 Emulator\utility.c;C:\Users\conno\Desktop\XM-23 Emulator\x64\Debug\utility.obj
