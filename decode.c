@@ -328,7 +328,7 @@ void execute(unsigned short ir, unsigned short pc)
 
 		case SUB: // Subtract source from destination (uses two's complement subtraction).
 			printf("(SUB)\n");
-			regfile[0][DEST(ir)] = add(regfile[0][DEST(ir)], (~regfile[RC(ir)][SOURCE(ir)] + 1), 0, WB(ir));
+			regfile[0][DEST(ir)] = add(regfile[0][DEST(ir)], ((~regfile[RC(ir)][SOURCE(ir)]) + 1), 0, WB(ir));
 			break;
 
 		case SUBC: // Subtract source + carry from destination (uses two's complement subtraction).
