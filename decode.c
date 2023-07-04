@@ -22,8 +22,8 @@
 
 // Isolates specific bits present in the instruction register.
 // These definitions allow the emulator to extract parameters from the instruction register.
-#define OFFSET_BRANCH_LINK(x)		((x >> 12) & 0x1FFF)
-#define OFFSET_BRANCH_COND(x)		((x >> 9)  & 0x03FF)
+#define OFFSET_BRANCH_LINK(x)		((x)       & 0x1FFF)
+#define OFFSET_BRANCH_COND(x)		((x)       & 0x03FF)
 #define RC(x)						((x >> 7)  & 0x01)
 #define WB(x)						((x >> 6)  & 0x01)
 #define SOURCE(x)					((x >> 3)  & 0x07)
@@ -267,7 +267,7 @@ int decode(unsigned short ir)
 // Executes the instruction stored in the instruction register.
 void execute(unsigned short ir, unsigned short pc)
 {
-	printf("Instruction Register: %04x ", ir);
+	printf("IR: 0x%04x ", ir);
 
 	switch (decode(ir))
 	{
