@@ -12,6 +12,8 @@
 #include <string.h>
 #include <signal.h>
 
+#define VERBOSE
+
 #define NEWLINE '\n'
 #define NUL '\0'
 
@@ -60,28 +62,27 @@ typedef union _Memory {
 	unsigned short word[MEMORY_SIZE / 2];	// Each memory address contains 1 word (2 bytes).
 }	Memory;
 
+// Breaks a word into its four independent nibbles.
+typedef struct _Nibbles 
+{
+	unsigned short n0 : 4;
+	unsigned short n1 : 4;
+	unsigned short n2 : 4;
+	unsigned short n3 : 4;
+}	Nibbles;
+
+// Combines nibbles and word into a single union, allowing data to be written to a shared space in memory.
+typedef union _WordNib
+{
+	struct _Nibbles nibbles;
+	unsigned short word;
+}	WordNib;
+
 extern CPU cpu;								// Global emulator CPU.
 extern PSW psw;								// Global emulator PSW.
 extern Memory mem;							// Global emulator memory.
 extern unsigned short regfile[2][8];		// Global emulator register file.
 extern volatile sig_atomic_t ctrl_c_fnd;	// Ctrl+C signal indicator.
-
-// Functions defined in "utils.c":
-extern void				close();
-extern void				appendNewline(char* str);
-extern void				swap_newline(char* str);
-extern int				open_xme_file(FILE* file, int args_num, const char* file_name);
-extern void				flush_buffer();
-extern void				sigint_hdlr();
-extern void				print_controls();
-extern unsigned short	combine_bytes(unsigned short msb, unsigned short lsb);
-
-// Functions defined in "memory.c":
-extern void				bus(unsigned short mar, unsigned short* mbr, int rw, int wb);
-extern unsigned int		mem_read(unsigned int address);
-extern void				mem_write(unsigned int address, unsigned int data);
-extern void				print_mem(int start, int end);
-extern unsigned int		load_srec(FILE* file);
 
 // Functions defined in "CPU.c":
 extern void				initialize_cpu(CPU* cpu);
@@ -92,11 +93,18 @@ extern void				fetch();
 extern int				decode(unsigned short ir);
 extern void				execute(unsigned short ir, unsigned short pc);
 
+// Functions defined in "memory.c":
+extern void				bus(unsigned short mar, unsigned short* mbr, int rw, int wb);
+extern unsigned int		mem_read(unsigned int address);
+extern void				mem_write(unsigned int address, unsigned int data);
+extern void				print_mem(int start, int end);
+extern unsigned int		load_srec(FILE* file);
+
 // Functions defined in "instructions.c":
 extern void				branch_conditional(unsigned short condition, unsigned short expected, unsigned short offset);
 extern void				branch_link(unsigned short offset);
 extern unsigned short	add(unsigned short dest, unsigned short source, unsigned short carry, unsigned short wb);
-						// DADD
+extern unsigned short	add_decimal(unsigned short dest, unsigned short source, unsigned short wb);
 extern void				compare(unsigned short dest, unsigned short source, unsigned short wb);
 extern unsigned short	xor(unsigned short dest, unsigned short source, unsigned short wb);
 extern unsigned short	and(unsigned short dest, unsigned short source, unsigned short wb);
@@ -106,8 +114,8 @@ extern unsigned short	clear_bit(unsigned short dest, unsigned short source, unsi
 extern unsigned short	set_bit(unsigned short dest, unsigned short source, unsigned short wb);
 extern void				move_bytes(unsigned short* reg, unsigned char high, unsigned char low);
 extern void				swap_reg(unsigned short* dest, unsigned short* source);
-						// SRA
-						// RRC
+unsigned short			shift(unsigned short dest, unsigned short wb);
+extern unsigned short	rotate(unsigned short dest, unsigned short wb);
 extern unsigned short	complement(unsigned short dest, unsigned short wb);
 extern unsigned short	swap_byte(unsigned short dest);
 extern unsigned short	sign_extend(unsigned short dest);
@@ -116,3 +124,13 @@ extern void				store(unsigned short* dest, unsigned short source, unsigned short
 extern unsigned short	move(unsigned short dest, unsigned short source, unsigned short wb);
 extern void				load_rel(unsigned short* dest, unsigned short source, short offset, unsigned short wb);
 extern void				store_rel(unsigned short dest, unsigned short source, short offset, unsigned short wb);
+
+// Functions defined in "utils.c":
+extern void				close();
+extern void				appendNewline(char* str);
+extern void				swap_newline(char* str);
+extern int				open_xme_file(FILE* file, int args_num, const char* file_name);
+extern void				flush_buffer();
+extern void				sigint_hdlr();
+extern void				print_controls();
+extern unsigned short	combine_bytes(unsigned short msb, unsigned short lsb);

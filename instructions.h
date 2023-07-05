@@ -75,10 +75,12 @@
 #define BYTE_MOV(x)					((x >> 3)  & 0xFF)
 #define OFFSET_LOAD_STORE_REL(x)	((x >> 7)  & 0x7F)
 
-#define LSBYTE(x)     ((x) & 0xFF)
-#define MSBYTE(x)     (((x) >> 8) & 0xFF)
+#define LSBYTE(x)     ((x)         & 0xFF)
+#define MSBYTE(x)     (((x) >> 8)  & 0xFF)
 #define MSBIT_WORD(x) (((x) >> 15) & 0x0001)
-#define MSBIT_BYTE(x) (((x) >> 7) & 0x0001)
+#define MSBIT_BYTE(x) (((x) >> 7)  & 0x0001)
+#define LSBIT_WORD(x) ((x)         & 0x01)
+#define LSBIT_BYTE(x) ((x)         & 0x01)
 
 #define PRE	 0
 #define POST 1
