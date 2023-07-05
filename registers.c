@@ -7,25 +7,48 @@
 #include "instructions.h"
 
 // Prints the contents of the register file.
-// Includes both 8 registers and 8 constants.
+// Includes both 8 registers and 8 constants, and labels the special registers.
 void print_reg(unsigned short regfile[2][8])
 {
-	printf("Printing the current contents of the register file...\n");
-	for (int r = 0; r < 2; r++)
+	printf("Printing register file...\n");
+	for (int c = 0; c < 8; c++)
 	{
-		switch (r) 
+		for (int r = 0; r < 2; r++)
 		{
-		case 0:
-			printf("Registers: ");
-			break;
+			switch (r)
+			{
+			case 0:
+				printf("R%i: ", c);
+				printf("%04x", regfile[r][c]);
+				switch (c)
+				{
+				case 4:
+					printf(" (BP)");
+					break;
 
-		case 1:
-			printf("Constants: ");
-			break;
-		}	
-		for (int c = 0; c < 8; c++)
-		{
-			printf("%04x ", regfile[r][c]);
+				case 5:
+					printf(" (LR)");
+					break;
+
+				case 6:
+					printf(" (SP)");
+					break;
+
+				case 7:
+					printf(" (PC)");
+					break;
+
+				default:
+					break;
+				}
+				printf("\t");
+				break;
+
+			case 1:
+				printf("C%i: ", c);
+				printf("%04x", regfile[r][c]);
+				break;
+			}
 		}
 		printf("\n");
 	}

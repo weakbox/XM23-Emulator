@@ -16,9 +16,6 @@ unsigned short mbr =	0;
 unsigned short cr =		0;
 unsigned short ir =		0;
 
-unsigned short pc = 0;
-unsigned short lr = 0;
-
 unsigned short regfile[2][8] = 
 { 
 	{ 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 },	/* Registers. */
@@ -28,10 +25,10 @@ unsigned short regfile[2][8] =
 // Reads the contents of a memory location as a 16-bit word and places it into the instruction register.
 void fetch()
 {
-	mar = pc;
+	mar = PC;
 	bus(mar, &mbr, READ, WORD);
 	ir = mbr;
-	pc += 2;
+	PC += 2;
 	cpu.clock++;
 }
 
@@ -60,7 +57,7 @@ int main(int argv, char* argc[])
 	// All instructions have been loaded into virtual memory, the emulator can now begin execution.
 	printf("Start Address: 0x%x\n", start_addr);
 
-	pc = start_addr;
+	PC = start_addr;
 	int input;
 	int input_mod1 = 0;
 	int input_mod2 = 0;
@@ -76,7 +73,7 @@ int main(int argv, char* argc[])
 
 	while (running)
 	{
-		printf("What next? [Current PC = 0x%04x] [Current CPU Clock = %i]\n", pc, cpu.clock);
+		printf("What next? [Current PC = 0x%04x] [Current CPU Clock = %i]\n", PC, cpu.clock);
 		printf("Input: ");
 		(void)scanf("%i", &input);
 		(void)getchar();
@@ -85,14 +82,14 @@ int main(int argv, char* argc[])
 		{
 			case 1:		/* Proceed: */
 				fetch();
-				execute(ir, pc);
+				execute(ir, PC);
 				break;
 
 			case 2:		/* Change the program counter: */
 				printf("Enter a new value for the program counter (4-digit hex):\n");
 				(void)scanf("%4x", &input_mod1);
 				(void)getchar();
-				pc = input_mod1;
+				PC = input_mod1;
 				break;
 
 			case 3:		/* Print memory: */

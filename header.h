@@ -34,10 +34,19 @@
 #define DATA_OFFSET 8
 #define CHECKSUM_OFFSET 2
 
+#define BP regfile[0][4]	// R4 -> Base Pointer
+#define LR regfile[0][5]	// R5 -> Link Register
+#define SP regfile[0][6]	// R6 -> Stack Pointer
+#define PC regfile[0][7]	// R7 -> Program Counter
+
 // Registers and variables relevent to the operation of the CPU (needs updating).
 typedef struct _CPU
 {
 	unsigned int clock;
+	unsigned short mar;
+	unsigned short mbr;
+	unsigned short cr;
+	unsigned short ir;
 }	CPU;
 
 // Combines word and byte addressing into one union, where data will be written to a shared space in memory.
@@ -67,9 +76,6 @@ extern CPU cpu;
 
 extern unsigned short regfile[2][8];
 
-extern unsigned short pc;
-extern unsigned short lr;
-
 extern unsigned short mar;
 extern unsigned short mbr;
 extern unsigned short cr;
@@ -88,10 +94,6 @@ extern void print_mem(int start, int end, int wb);
 extern unsigned int load_srec(FILE* file);
 
 // Functions present in "decode.c":
-extern void print_arith(const char* name, unsigned short ir);
-extern void print_branch(const char* name, unsigned short ir, unsigned short pc);
-extern void print_loadrel(const char* name, unsigned short ir);
-extern short sign_extend_offset(unsigned short offset);
 extern int decode(unsigned short ir);
 extern void execute(unsigned short ir, unsigned short pc);
 
