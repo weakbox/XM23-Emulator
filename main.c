@@ -1,124 +1,115 @@
 /*
-*	XM-23 Emulation Software.
-*	Written by Connor McLeod, for ECED 3403.
+  File: main.c
+  Author: Connor McLeod
+  Date: May 21, 2023
+  Description: Emulator for the XM-23 RISC processor.
 */
 
 #include "header.h"
 
-FILE* file;
-Memory mem;
-PSW psw;
 CPU cpu;
-
-// CPU Registers:
-unsigned short mar =	0;
-unsigned short mbr =	0;
-unsigned short cr =		0;
-unsigned short ir =		0;
+PSW psw;
+Memory mem;
 
 unsigned short regfile[2][8] = 
 { 
-	{ 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 },	/* Registers. */
-	{ 0x0000, 0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 0xFFFF }	/* Constants. */
+	{ 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 },	// Registers.
+	{ 0x0000, 0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 0xFFFF }	// Constants.
 };
 
-// Reads the contents of a memory location as a 16-bit word and places it into the instruction register.
-void fetch()
-{
-	mar = PC;
-	bus(mar, &mbr, READ, WORD);
-	ir = mbr;
-	PC += 2;
-	cpu.clock++;
-}
-
+// Please note that the code is heavily commented for ease of marking.
 int main(int argv, char* argc[])
 {
-	// File opening handling:
-	if (argv < 2)
+	// Open .xme program file.
+	// Fails if no file, wrong type, or inaccessible.
+	FILE* file;
+	if (open_xme_file(&file, argv, argc[1]) != 0)
 	{
-		printf("No file was inputted!\n");
 		close();
-		return -1;
+		return -1;	// Program file failed to open.
 	}
+	printf("File opened successfully: %s\n", argc[1]);
 
-	if (fopen_s(&file, argc[1], "r") != 0)
-	{
-		printf("There was a problem opening the file...\n");
-		close();
-		return -1;
-	}
+	// Load contents of .xme program file into virtual memory.
+	// This function also returns the start address of the PC.
+	PC = load_srec(file);
 
-	printf("File %s was opened successfully!\n", argc[1]);
+	// Instructions have been loaded into virtual memory.
+	// Initialize the CPU's internal registers.
+	initialize_cpu(&cpu);
 
-	// Load contents of S-Record file into virtual memory:
-	int start_addr = load_srec(file);
-
-	// All instructions have been loaded into virtual memory, the emulator can now begin execution.
-	printf("Start Address: 0x%x\n", start_addr);
-
-	PC = start_addr;
-	int input;
+	// Initialize local variables for user input.
+	bool running   = TRUE;
+	int input	   = 0;
 	int input_mod1 = 0;
 	int input_mod2 = 0;
-	int running = TRUE;
+	int breakpoint = 0;
 
-	printf("Emulator Controls:\n");
-	printf("1: Continue execution\n");
-	printf("2: Change the program counter\n");
-	printf("3: Print memory\n");
-	printf("4: Print registers\n");
-	printf("5: Print PSW\n");
-	printf("0: Exit\n");
+	// Prints the emulator's controls.
+	print_controls();
 
+	// Setup is complete, the execution can begin.
 	while (running)
 	{
-		printf("What next? [Current PC = 0x%04x] [Current CPU Clock = %i]\n", PC, cpu.clock);
+		// Prompts the user for input and reads the value.
+		printf("Clock: %i\n", cpu.clock);
 		printf("Input: ");
 		(void)scanf("%i", &input);
 		(void)getchar();
 
 		switch (input)
 		{
-			case 1:		/* Proceed: */
-				fetch();
-				execute(ir, PC);
+			case 1: // Run program.
+				printf("Program execution in progress. Press ctrl+c to halt.\n");
+				while (PC != breakpoint)
+				{
+					fetch();
+					execute(cpu.ir, PC);
+				}
 				break;
 
-			case 2:		/* Change the program counter: */
-				printf("Enter a new value for the program counter (4-digit hex):\n");
+			case 2: // Step through program.
+				fetch();
+				execute(cpu.ir, PC);
+				break;
+
+			case 3: // Set breakpoint.
+				printf("Enter breakpoint:\n");
+				printf("Input: ");
+				(void)scanf("%4x", &input_mod1);
+				(void)getchar();
+				breakpoint = input_mod1;
+				break;
+
+			case 4: // Modify program counter.
+				printf("Enter new program counter:\n");
+				printf("Input: ");
 				(void)scanf("%4x", &input_mod1);
 				(void)getchar();
 				PC = input_mod1;
 				break;
 
-			case 3:		/* Print memory: */
-				printf("Enter the range of addresses you would like to print from memory <start> <end>\n");
+			case 5: // Print memory contents.
+				printf("Enter addresses to print: <start> <end>\n");
+				printf("Input: ");
 				(void)scanf("%4x %4x", &input_mod1, &input_mod2);
 				(void)getchar();
 				print_mem(input_mod1, input_mod2, BYTE);
 				break;
 
-			case 4:		/* Print registers: */
+			case 6: // Print register values.
 				print_reg(regfile);
 				break;
 
-			case 5:	// Print contents of PSW.
+			case 7:	// Print PSW.
 				print_psw();
 				break;
 
-			default:	/* Close the emulator: */
+			default: // Exit emulator.
 				running = FALSE;
 				break;
 		}
 	}
-	// Debugging space!
-	if (0)
-	{
-		printf("Debug: Test code!\n");
-		close();
-	}
-
 	fclose(file);
 	return 0;
 }

@@ -6,6 +6,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 
 #define NEWLINE '\n'
@@ -17,7 +18,7 @@
 #define PRE	 0
 #define POST 1
 
-#define MEMORY_SIZE 65536	/* Memory size in bytes. */
+#define MEMORY_SIZE 65536	// Memory size in bytes.
 
 #define READ 0
 #define WRITE 1
@@ -39,7 +40,7 @@
 #define SP regfile[0][6]	// R6 -> Stack Pointer
 #define PC regfile[0][7]	// R7 -> Program Counter
 
-// Registers and variables relevent to the operation of the CPU (needs updating).
+// Registers and variables relevent to the operation of the CPU.
 typedef struct _CPU
 {
 	unsigned int clock;
@@ -76,15 +77,11 @@ extern CPU cpu;
 
 extern unsigned short regfile[2][8];
 
-extern unsigned short mar;
-extern unsigned short mbr;
-extern unsigned short cr;
-extern unsigned short ir;
-
 // Functions present in "utility.c"
 extern void close();
 extern void appendNewline(char* str);
 extern void swap_newline(char* str);
+extern int open_xme_file(FILE* file, int args_num, const char* file_name);
 
 // Functions present in "memory.c":
 extern void bus(unsigned short mar, unsigned short* mbr, int rw, int wb);
@@ -94,6 +91,7 @@ extern void print_mem(int start, int end, int wb);
 extern unsigned int load_srec(FILE* file);
 
 // Functions present in "decode.c":
+extern void fetch();
 extern int decode(unsigned short ir);
 extern void execute(unsigned short ir, unsigned short pc);
 
@@ -107,7 +105,8 @@ extern void update_psw(unsigned short dest, unsigned short source, unsigned shor
 extern unsigned short combine_bytes(unsigned short msb, unsigned short lsb);
 extern void print_psw();
 
-
+extern void initialize_cpu(CPU* cpu);
+extern void print_controls();
 
 // Instruction functions:
 

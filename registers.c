@@ -54,6 +54,16 @@ void print_reg(unsigned short regfile[2][8])
 	}
 }
 
+// Initializes the fields of the CPU struct. 
+void initialize_cpu(CPU *cpu)
+{
+	cpu->clock = 0;
+	cpu->mar = 0;
+	cpu->mbr = 0;
+	cpu->cr = 0;
+	cpu->ir = 0;
+}
+
 // Updates the Program Status Word (PSW) based on the result of execution for a particular instruction.
 // Retrieved from Dr. Larry Hughes (2023).
 void update_psw(unsigned short dest, unsigned short source, unsigned short result, unsigned short wb)

@@ -1,5 +1,5 @@
 /*
-*	Functions and definitions related to reading from and writing to virtual memory (Lab 1).
+*	Functions and definitions related to reading from and writing to vcpu.irtual memory (Lab 1).
 *	Written by Connor McLeod, for ECED 3403.
 */
 
@@ -8,7 +8,7 @@
 // Shifts a 16-bit address value to the right by 1 bit, turning it into a 15-bit address. This process effectively divides the value of the address by 2.
 #define word(x) x >> 1
 
-// Emulates the CPU bus. Moves data to and from the memory address specified by the MAR.
+// Emulates the CPU bus. Moves data to and from the memory address specified by the cpu.mar.
 void bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 {
 	switch (rw)
@@ -17,11 +17,11 @@ void bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 			switch (wb)
 			{
 				case WORD:
-					*mbr = mem.word[word(mar)];
+					cpu.mbr = mem.word[word(cpu.mar)];
 					break;
 
 				case BYTE:
-					*mbr = mem.byte[mar];
+					cpu.mbr = mem.byte[cpu.mar];
 					break;
 			}
 			break;
@@ -30,11 +30,11 @@ void bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 			switch (wb)
 			{
 				case WORD:
-					mem.word[word(mar)] = *mbr;
+					mem.word[word(cpu.mar)] = cpu.mbr;
 					break;
 
 				case BYTE:
-					mem.byte[mar] = (unsigned char)*mbr;
+					mem.byte[cpu.mar] = (unsigned char)cpu.mbr;
 					break;
 			}
 			break;
@@ -42,19 +42,19 @@ void bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 	cpu.clock += 3;
 }
 
-// Reads data directly from a specified address in memory. Used by the initial S-Record loader.
+// Reads data dcpu.irectly from a specified address in memory. Used by the initial S-Record loader.
 unsigned int mem_read(unsigned int address)
 {
 	return mem.byte[address];
 }
 
-// Writes data directly to a specified address in memory. Used by the initial S-Record loader.
+// Writes data dcpu.irectly to a specified address in memory. Used by the initial S-Record loader.
 void mem_write(unsigned int address, unsigned int data)
 {
 	mem.byte[address] = data;
 }
 
-// Prints the contents of virtual memory in a specified range (experiencing some odd crashes every now and then, needs investigating).
+// Prints the contents of vcpu.irtual memory in a specified range (experiencing some odd crashes every now and then, needs investigating).
 void print_mem(int start, int end, int wb)
 {
 	if (start > end)
@@ -105,7 +105,7 @@ void print_mem(int start, int end, int wb)
 	printf("\n");
 }
 
-// Loads contents of S-Record (.xme) file into virtual memory. Returns value of the program's start address (really poorly made, needs refactoring).
+// Loads contents of S-Record (.xme) file into vcpu.irtual memory. Returns value of the program's start address (really poorly made, needs refactoring).
 unsigned int load_srec(FILE* file)
 {
 	// S-Record decoding and initial load of memory:
@@ -149,13 +149,13 @@ unsigned int load_srec(FILE* file)
 			return -1;
 		}
 
-		// Determine if record is a valid type and meets requirements. A record can have a length no less than 3 bytes.
+		// Determine if record is a valid type and meets requcpu.irements. A record can have a length no less than 3 bytes.
 		if (type[0] != 'S' || (type[1] != '0' && type[1] != '1' && type[1] != '9') || (len < 3 || len > 36))
 		{
 			validRecord = 0;
 		}
 
-		// If the record is a valid type and meets requirements, proceed with processing.
+		// If the record is a valid type and meets requcpu.irements, proceed with processing.
 		if (validRecord)
 		{
 			// Combine the high and low address bytes into one full address.
@@ -164,7 +164,7 @@ unsigned int load_srec(FILE* file)
 			/* Determine data in record (variable length): */
 			for (int i = ADDRESS_OFFSET; i < ((2 * len) - CHECKSUM_OFFSET); i += 2)	/* Convert length from bytes to nibbles and remove the checksum. */
 			{
-				if (sscanf(&str[i + (DATA_OFFSET - ADDRESS_OFFSET)], "%2x", &data) != 1)	/* Start iterating through input string at first data byte. */
+				if (sscanf(&str[i + (DATA_OFFSET - ADDRESS_OFFSET)], "%2x", &data) != 1)	/* Start iterating through input string at fcpu.irst data byte. */
 				{
 					printf("ERROR: Scanning data has failed.\n");
 					close();
@@ -176,7 +176,7 @@ unsigned int load_srec(FILE* file)
 
 				if (type[1] == '0')	/* Record is of S0 type, so print the filename. */
 				{
-					printf("%c", data);
+					// printf("%c", data);
 				}
 
 				if (type[1] == '1')
@@ -188,9 +188,9 @@ unsigned int load_srec(FILE* file)
 
 			if (type[1] == '1' || type[1] == '9')	/* Record is of S1 or S9 type, so print the address. */
 			{
-				printf("0x%x", addr);
+				// printf("0x%x", addr);
 			}
-			printf("\n");
+			//printf("\n");
 
 			if (type[1] == '9')	/* Record S9 type, so store the starting address. */
 			{
