@@ -1,5 +1,5 @@
 /*
-*	Functions and definitions related to reading from and writing to vcpu.irtual memory (Lab 1).
+*	Functions and definitions related to reading from and writing to virtual memory (Lab 1).
 *	Written by Connor McLeod, for ECED 3403.
 */
 
@@ -42,70 +42,69 @@ void bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 	cpu.clock += 3;
 }
 
-// Reads data dcpu.irectly from a specified address in memory. Used by the initial S-Record loader.
+// Reads data directly from a specified address in memory. Used by the initial S-Record loader.
 unsigned int mem_read(unsigned int address)
 {
 	return mem.byte[address];
 }
 
-// Writes data dcpu.irectly to a specified address in memory. Used by the initial S-Record loader.
+// Writes data directly to a specified address in memory. Used by the initial S-Record loader.
 void mem_write(unsigned int address, unsigned int data)
 {
 	mem.byte[address] = data;
 }
 
-// Prints the contents of vcpu.irtual memory in a specified range (experiencing some odd crashes every now and then, needs investigating).
-void print_mem(int start, int end, int wb)
+// Prints the contents of virtual memory in a specified range.
+void print_mem(int start, int end)
 {
-	if (start > end)
+	// Make sure user does not choose any invalid values.
+	if (start > MEMORY_SIZE || end > MEMORY_SIZE || start < 0 || end < 0 || start > end)
 	{
-		printf("An invalid memory address was chosen. Memory will not be printed.\n");
+		printf("Invalid memory address range.\n");
 		return;
 	}
-	if (wb == WORD) 
-	{ 
-		if (start > MEMORY_SIZE/2 || end > MEMORY_SIZE/2 || start < 0 || end < 0)
-		{
-			printf("An invalid memory address was chosen. Memory will not be printed.\n");
-			return;
-		}
-		printf("Printing contents of word-addressed memory from addresses 0x%04x to 0x%04x...\n", start, end);
-	}
-	else /* wb == BYTE */
-	{ 
-		if (start > MEMORY_SIZE || end > MEMORY_SIZE || start < 0 || end < 0)
-		{
-			printf("An invalid memory address was chosen. Memory will not be printed.\n");
-			return;
-		}
-		printf("Printing contents of byte-addressed memory from addresses 0x%04x to 0x%04x...\n", start, end);
-	}
-	for (int i = start, j = 1 ; i <= end; i++, j++)
+
+	printf("Printing addresses %04x to %04x.\n", start, end);
+
+	// Create a local array to store the ascii representation of the contents of memory.
+	char mem_ascii[17]; // Increase size by 1 for null-terminator.
+
+	int count = 0;
+
+	for (int i = start; i < end; i++)
 	{
-		if (j == 1)
+		if (count == 0)
 		{
 			printf("%04x: ", i);
 		}
-		switch (wb)
-		{
-		case WORD:		
-			printf("%04x ", mem.word[i]);
-			break;
 
-		case BYTE:
-			printf("%02x ", mem.byte[i]);
-			break;
-		}
-		if (j == 16 && i != end) 
+		printf("%02x ", mem.byte[i]);
+
+		// Only store the ascii representation if it is a printable character.
+		if (mem.byte[i] >= '!' && mem.byte[i] <= '~')
 		{
-			printf("\n");
-			j = 0;
+			mem_ascii[count] = mem.byte[i];
+		}
+		else
+		{
+			mem_ascii[count] = '.';	// Store as a period otherwise.
+		}
+
+		// Every 16 prints, move to a new line and print the ascii representation.
+		if (++count == 16)
+		{
+			mem_ascii[count] = '\0'; // Add null-terminator.
+			printf(" %s\n", mem_ascii);
+			count = 0;
 		}
 	}
-	printf("\n");
+	if (count != 0)	// Append newline character if memory stopped printing halfway through a line.
+	{
+		printf("\n");
+	}
 }
 
-// Loads contents of S-Record (.xme) file into vcpu.irtual memory. Returns value of the program's start address (really poorly made, needs refactoring).
+// Loads contents of S-Record (.xme) file into virtual memory. Returns value of the program's start address (really poorly made, needs refactoring).
 unsigned int load_srec(FILE* file)
 {
 	// S-Record decoding and initial load of memory:

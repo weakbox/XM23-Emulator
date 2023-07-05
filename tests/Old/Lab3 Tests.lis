@@ -1,0 +1,94 @@
+X-Makina Assembler - Version XM-23 Single Pass+ Assembler - Release 02.06.23
+Input file name: Lab3 Tests.asm
+Time of assembly: Thu 15 Jun 2023 21:12:20 
+  1	    	     	;
+  2	    	     	; Tests for Lab 3
+  3	    	     	; Tests MOVL, MOVH, MOVLZ, MOVLS, LD, and LDR
+  4	    	     	; ECED 3403
+  5	    	     	; 15 June 2023
+  6	    	     	;
+  7	    	     	DATA	equ	#9876
+  8	    	     	;
+  9	    	     		org	#100		; ORG sets the assembler origin to #0100
+ 10	    	     	;
+ 11	    	     	; Value is a LABEL (ADDRESS) referring to memory location #0100
+ 12	    	     	; Address #0100 has contents #9876
+ 13	    	     	;
+ 14	0100	1234	Value	word	#1234		; Memory location #0100 <- #34; #0101 <- #12
+ 15	0102	5678	Value2	word	#5678
+ 16	    	     	
+ 17	    	     		org	#104
+ 18	    	     		
+ 19	0104	1337	Value3	word	#1337
+ 20	    	     	
+ 21	    	     		org #00FC
+ 22	    	     		
+ 23	00FC	9979	Value4	word	#9979
+ 24	    	     	
+ 25	    	     	;
+ 26	    	     		org	#1000		; ORG sets the assembler origin to #1000
+ 27	    	     	;
+ 28	    	     	Start				; Start is a label with address #1000
+ 29	    	     	; 
+ 30	    	     	; Use immediate constants
+ 31	    	     	;
+ 32	1000	63B4		movl	DATA,R4		; R4.LSByte <- #34
+ 33	1002	7CC4		movh	DATA,R4		; R4.MSByte <- #12
+ 34	1004	6BB5		movlz	DATA,R5		; R5.LSByte <- #34	R5.MSByte <- #FF
+ 35	1006	73B6		movls	DATA,R6		; R6.LSByte <- #34, R6.MSByte <- #00
+ 36	    	     	;
+ 37	    	     	; Use a memory location
+ 38	    	     	; Takes two steps:
+ 39	    	     	; 1. Move a memory address into a register (R0 in this case)
+ 40	    	     	;
+ 41	1008	6000		movl	Value,R0	; R0.LSByte <- #00
+ 42	100A	7808		movh	Value,R0	; R0.MSByte <- #01
+ 43	    	     	;
+ 44	    	     	; 2. Load R4 from location specified in R0 (#0100)
+ 45	    	     	;
+ 46	    	     	
+ 47	    	     	;
+ 48	    	     	; Test LD instruction without increment/decrement:
+ 49	    	     	;
+ 50	100C	5804		ld		R0,R4		; R4 <- mem[R0]
+ 51	    	     	;
+ 52	    	     	; Test LD instruction with increment/decrement:
+ 53	    	     	;	
+ 54	100E	5881		ld 		R0+,R1		; R1 <- mem[R0+] (#5678)
+ 55	1010	5902		ld		R0-,R2		; R2 <- mem[R0-] (#1234)
+ 56	    	     	;
+ 57	    	     	; Test LD instruction with increment/decrement with byte addressing:
+ 58	    	     	;
+ 59	1012	58C3		ld.b	R0+,R3		; R1 <- mem[R0+] (#12)
+ 60	1014	5947		ld.b	R0-,R7		; R2 <- mem[R0-] (#34)
+ 61	    	     	;
+ 62	    	     	; Test LDR instruction with each possible type of offset:
+ 63	    	     	;
+ 64	1016	8201		ldr		R0,$4,R1
+ 65	1018	BE02		ldr		R0,$-4,R2
+ 66	101A	8243		ldr.b	R0,$4,R3
+ 67	101C	BE44		ldr.b	R0,$-4,R4
+ 68	    	     	
+ 69	    	     		end	Start		; End of program, set PC to address of Start
+
+Successful completion of assembly - 1P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Start                              	REL	1000	4096	PRI
+Value4                             	REL	00FC	252	PRI
+Value3                             	REL	0104	260	PRI
+Value2                             	REL	0102	258	PRI
+Value                              	REL	0100	256	PRI
+DATA                               	CON	9876	-26506	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\conno\Desktop\Lab3 Tests.xme
+

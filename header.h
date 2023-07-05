@@ -82,12 +82,13 @@ extern void close();
 extern void appendNewline(char* str);
 extern void swap_newline(char* str);
 extern int open_xme_file(FILE* file, int args_num, const char* file_name);
+extern void flush_buffer();
 
 // Functions present in "memory.c":
 extern void bus(unsigned short mar, unsigned short* mbr, int rw, int wb);
 extern unsigned int mem_read(unsigned int address);
 extern void mem_write(unsigned int address, unsigned int data);
-extern void print_mem(int start, int end, int wb);
+extern void print_mem(int start, int end);
 extern unsigned int load_srec(FILE* file);
 
 // Functions present in "decode.c":
@@ -109,23 +110,25 @@ extern void initialize_cpu(CPU* cpu);
 extern void print_controls();
 
 // Instruction functions:
+extern void				branch_conditional(unsigned short condition, unsigned short expected, unsigned short offset);
+extern void				branch_link(unsigned short offset);
+extern unsigned short	add(unsigned short dest, unsigned short source, unsigned short carry, unsigned short wb);
+extern void				compare(unsigned short dest, unsigned short source, unsigned short wb);
+extern unsigned short	xor(unsigned short dest, unsigned short source, unsigned short wb);
+extern unsigned short	and(unsigned short dest, unsigned short source, unsigned short wb);
+extern unsigned short	or(unsigned short dest, unsigned short source, unsigned short wb);
+extern void				compare_bit(unsigned short dest, unsigned short source, unsigned short wb);
+extern unsigned short	set_bit(unsigned short dest, unsigned short source, unsigned short wb);
+extern unsigned short	clear_bit(unsigned short dest, unsigned short source, unsigned short wb);
 
-extern void branch_conditional(unsigned short condition, unsigned short expected, unsigned short offset);
-extern void branch_link(unsigned short offset);
-extern unsigned short add(unsigned short dest, unsigned short source, unsigned short carry, unsigned short wb);
-extern void compare(unsigned short dest, unsigned short source, unsigned short wb);
-extern unsigned short xor(unsigned short dest, unsigned short source, unsigned short wb);
-extern unsigned short and(unsigned short dest, unsigned short source, unsigned short wb);
-extern unsigned short or (unsigned short dest, unsigned short source, unsigned short wb);
-extern void compare_bit(unsigned short dest, unsigned short source, unsigned short wb);
-extern unsigned short set_bit(unsigned short dest, unsigned short source, unsigned short wb);
-extern unsigned short clear_bit(unsigned short dest, unsigned short source, unsigned short wb);
-extern void store(unsigned short* dest, unsigned short source, unsigned short prpo, unsigned short dec, unsigned short inc, unsigned short wb);
-extern void store_rel(unsigned short dest, unsigned short source, short offset, unsigned short wb);
-extern unsigned short move(unsigned short dest, unsigned short source, unsigned short wb);
-extern void swap_reg(unsigned short* dest, unsigned short* source);
-extern unsigned short complement(unsigned short dest, unsigned short wb);
-extern unsigned short swap_byte(unsigned short dest);
-extern unsigned short sign_extend(unsigned short dest);
-extern void store(unsigned short* dest, unsigned short source, unsigned short prpo, unsigned short dec, unsigned short inc, unsigned short wb);
-extern void store_rel(unsigned short dest, unsigned short source, short offset, unsigned short wb);
+extern void				store(unsigned short* dest, unsigned short source, unsigned short prpo, unsigned short dec, unsigned short inc, unsigned short wb);
+extern void				store_rel(unsigned short dest, unsigned short source, short offset, unsigned short wb);
+
+extern unsigned short	move(unsigned short dest, unsigned short source, unsigned short wb);
+extern void				swap_reg(unsigned short* dest, unsigned short* source);
+extern unsigned short	complement(unsigned short dest, unsigned short wb);
+extern unsigned short	swap_byte(unsigned short dest);
+extern unsigned short	sign_extend(unsigned short dest);
+
+extern void				store(unsigned short* dest, unsigned short source, unsigned short prpo, unsigned short dec, unsigned short inc, unsigned short wb);
+extern void				store_rel(unsigned short dest, unsigned short source, short offset, unsigned short wb);

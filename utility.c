@@ -70,3 +70,9 @@ int open_xme_file(FILE** file, int args_num, const char* file_name)
 
 	return 0;
 }
+
+// Removes unwanted characters from buffer.
+void flush_buffer()
+{
+	while ((getchar()) != '\n');
+}

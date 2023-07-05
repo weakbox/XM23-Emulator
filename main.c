@@ -55,7 +55,7 @@ int main(int argv, char* argc[])
 		printf("Clock: %i\n", cpu.clock);
 		printf("Input: ");
 		(void)scanf("%i", &input);
-		(void)getchar();
+		flush_buffer();
 
 		switch (input)
 		{
@@ -77,7 +77,7 @@ int main(int argv, char* argc[])
 				printf("Enter breakpoint:\n");
 				printf("Input: ");
 				(void)scanf("%4x", &input_mod1);
-				(void)getchar();
+				flush_buffer();
 				breakpoint = input_mod1;
 				break;
 
@@ -85,7 +85,7 @@ int main(int argv, char* argc[])
 				printf("Enter new program counter:\n");
 				printf("Input: ");
 				(void)scanf("%4x", &input_mod1);
-				(void)getchar();
+				flush_buffer();
 				PC = input_mod1;
 				break;
 
@@ -93,8 +93,8 @@ int main(int argv, char* argc[])
 				printf("Enter addresses to print: <start> <end>\n");
 				printf("Input: ");
 				(void)scanf("%4x %4x", &input_mod1, &input_mod2);
-				(void)getchar();
-				print_mem(input_mod1, input_mod2, BYTE);
+				flush_buffer();
+				print_mem(input_mod1, input_mod2);
 				break;
 
 			case 6: // Print register values.

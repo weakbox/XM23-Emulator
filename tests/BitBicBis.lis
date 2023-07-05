@@ -1,0 +1,60 @@
+X-Makina Assembler - Version XM-23 Single Pass+ Assembler - Release 02.06.23
+Input file name: BitBicBis.asm
+Time of assembly: Mon 3 Jul 2023 23:51:47 
+  1	    	     	VAL0 equ #FF00
+  2	    	     	VAL1 equ #0080
+  3	    	     	VAL2 equ #8000
+  4	    	     	VAL3 equ #FFFF
+  5	    	     	
+  6	    	     	org #1000
+  7	    	     	
+  8	    	     	Start
+  9	    	     	
+ 10	    	     	; Move value in VAL0 into R0.
+ 11	1000	6000	movl VAL0,R0
+ 12	1002	7FF8	movh VAL0,R0
+ 13	    	     	
+ 14	    	     	; Move value in VAL1 into R1.
+ 15	1004	6401	movl VAL1,R1
+ 16	1006	7801	movh VAL1,R1
+ 17	    	     	
+ 18	    	     	; Move value in VAL2 into R2.
+ 19	1008	6002	movl VAL2,R2
+ 20	100A	7C02	movh VAL2,R2
+ 21	    	     	
+ 22	    	     	; Move value in VAL3 into R3.
+ 23	100C	67FB	movl VAL3,R3
+ 24	100E	7FFB	movh VAL3,R3
+ 25	    	     	
+ 26	    	     	; Test the BIT instruction:
+ 27	1010	4908	bit R1,R0	; Expected: 0080 & FF00 No match. Zero bit -> set.
+ 28	1012	4910	bit R2,R0	; Expected: 8000 & FF00 Match! Negative bit -> set.
+ 29	1014	4949	bit.b R1,R1	; Expected: 0080 & 0080 Match! Negative bit -> set.
+ 30	    	     	
+ 31	    	     	; Test the BIC instruction:
+ 32	1016	4A9B	bic $4,R3
+ 33	    	     	
+ 34	    	     	; Test the BIS instruction:
+ 35	1018	4B9B	bis $4,R3
+ 36	    	     	
+ 37	    	     	end	Start
+Successful completion of assembly - 1P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Start                              	REL	1000	4096	PRI
+VAL3                               	CON	FFFF	-1	PRI
+VAL2                               	CON	8000	-32768	PRI
+VAL1                               	CON	0080	128	PRI
+VAL0                               	CON	FF00	-256	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\conno\Desktop\XM-23 Emulator\tests\BitBicBis.xme
+

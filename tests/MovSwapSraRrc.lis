@@ -1,0 +1,55 @@
+X-Makina Assembler - Version XM-23 Single Pass+ Assembler - Release 02.06.23
+Input file name: MovSwapSraRrc.asm
+Time of assembly: Tue 4 Jul 2023 00:15:51 
+  1	    	     	VAL1 equ #AAAA
+  2	    	     	VAL2 equ #BBBB
+  3	    	     	VAL3 equ #0000
+  4	    	     	
+  5	    	     	org #1000
+  6	    	     	
+  7	    	     	Start
+  8	    	     	
+  9	    	     	; Move value in VAL1 into R0.
+ 10	1000	6550	movl VAL1,R0
+ 11	1002	7D50	movh VAL1,R0
+ 12	    	     	
+ 13	    	     	; Move value in VAL2 into R1.
+ 14	1004	65D9	movl VAL2,R1
+ 15	1006	7DD9	movh VAL2,R1
+ 16	    	     	
+ 17	    	     	; Move value in VAL3 into R2.
+ 18	1008	6002	movl VAL3,R2
+ 19	100A	7802	movh VAL3,R2
+ 20	    	     	
+ 21	    	     	; Test the MOV instruction:
+ 22	    	     	
+ 23	    	     	
+ 24	    	     	; Test the SWAP instruction:
+ 25	100C	4C88	swap R1,R0
+ 26	    	     	
+ 27	    	     	; Test the SRA instruction:
+ 28	    	     	
+ 29	    	     	
+ 30	    	     	; Test the RRC instruction:
+ 31	    	     	
+ 32	    	     	end	Start
+
+Successful completion of assembly - 1P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Start                              	REL	1000	4096	PRI
+VAL3                               	CON	0000	0	PRI
+VAL2                               	CON	BBBB	-17477	PRI
+VAL1                               	CON	AAAA	-21846	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\conno\Desktop\XM-23 Emulator\tests\MovSwapSraRrc.xme
+

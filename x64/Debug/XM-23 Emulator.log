@@ -1,4 +1,3 @@
-﻿  main.c
-C:\Users\conno\Desktop\XM-23Emulator\main.c(26,25): warning C4047: 'function': 'FILE *' differs in levels of indirection from 'FILE **'
-C:\Users\conno\Desktop\XM-23Emulator\main.c(26,20): warning C4024: 'open_xme_file': different types for formal and actual parameter 1
+﻿  memory.c
+C:\Users\conno\Desktop\XM-23Emulator\memory.c(164,35): warning C4018: '<': signed/unsigned mismatch
   XM-23 Emulator.vcxproj -> C:\Users\conno\Desktop\XM-23Emulator\x64\Debug\XM-23 Emulator.exe
