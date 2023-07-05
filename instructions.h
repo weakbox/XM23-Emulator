@@ -1,7 +1,7 @@
 /*
   File: instructions.h
   Author: Connor McLeod
-  Creation Date: July 2, 2023
+  Date: July 2, 2023
   Description: Provides useful macro definitions for the instruction functions.
 */
 
@@ -49,7 +49,36 @@
 #define LDR 39
 #define STR 40
 
+// Isolates specific bits present in the instruction register.
+// These definitions allow the emulator to decode the opcode present in the instruction register.
+#define BITS_15_AND_14(x)	((x >> 14) & 0x03)
+#define BIT_13(x)			((x >> 13) & 0x01)
+#define BITS_12_AND_11(x)	((x >> 11) & 0x03)
+#define BITS_12_TO_10(x)	((x >> 10) & 0x07)
+#define BIT_10(x)			((x >> 10) & 0x01)
+#define BITS_9_AND_8(x)		((x >> 8)  & 0x03)
+#define BITS_9_TO_7(x)		((x >> 7)  & 0x07)
+#define BITS_6_AND_5(x)		((x >> 5)  & 0x03)
+#define BITS_5_TO_3(x)		((x >> 3)  & 0x07)
+
+// Isolates specific bits present in the instruction register.
+// These definitions allow the emulator to extract parameters from the instruction register.
+#define OFFSET_BRANCH_LINK(x)		((x)       & 0x1FFF)
+#define OFFSET_BRANCH_COND(x)		((x)       & 0x03FF)
+#define RC(x)						((x >> 7)  & 0x01)
+#define WB(x)						((x >> 6)  & 0x01)
+#define SOURCE(x)					((x >> 3)  & 0x07)
+#define DEST(x)						((x)       & 0x07)
+#define PRPO(x)						((x >> 9)  & 0x01)
+#define DEC(x)						((x >> 8)  & 0x01)
+#define INC(x)						((x >> 7)  & 0x01)
+#define BYTE_MOV(x)					((x >> 3)  & 0xFF)
+#define OFFSET_LOAD_STORE_REL(x)	((x >> 7)  & 0x7F)
+
 #define LSBYTE(x)     ((x) & 0xFF)
 #define MSBYTE(x)     (((x) >> 8) & 0xFF)
 #define MSBIT_WORD(x) (((x) >> 15) & 0x0001)
 #define MSBIT_BYTE(x) (((x) >> 7) & 0x0001)
+
+#define PRE	 0
+#define POST 1

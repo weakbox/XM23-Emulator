@@ -127,15 +127,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="decode.c" />
-    <ClCompile Include="inst_memory.c" />
+    <ClCompile Include="header_old.h" />
     <ClCompile Include="main.c" />
     <ClCompile Include="memory.c" />
-    <ClCompile Include="inst_misc.c" />
-    <ClCompile Include="registers.c" />
-    <ClCompile Include="inst_transfer_control.c" />
-    <ClCompile Include="inst_2_operand.c" />
-    <ClCompile Include="utility.c" />
+    <ClCompile Include="CPU.c" />
+    <ClCompile Include="instructions.c" />
+    <ClCompile Include="utils.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header.h" />

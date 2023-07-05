@@ -1,9 +1,12 @@
 /*
-*	Functions and definitions related to reading from and writing to virtual memory (Lab 1).
-*	Written by Connor McLeod, for ECED 3403.
+  File: memory.c
+  Author: Connor McLeod
+  Date: May 21, 2023
+  Description: Functions and definitions related to reading from and writing to virtual memory.
 */
 
 #include "header.h"
+#include "header_old.h"	// As this is the first program, it uses some old definitions. These should be changed.
 
 // Shifts a 16-bit address value to the right by 1 bit, turning it into a 15-bit address. This process effectively divides the value of the address by 2.
 #define word(x) x >> 1

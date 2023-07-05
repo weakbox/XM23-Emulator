@@ -17,6 +17,8 @@ unsigned short regfile[2][8] =
 	{ 0x0000, 0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 0xFFFF }	// Constants.
 };
 
+volatile sig_atomic_t ctrl_c_fnd;
+
 // Please note that the code is heavily commented for ease of marking.
 int main(int argv, char* argc[])
 {
@@ -39,11 +41,14 @@ int main(int argv, char* argc[])
 	initialize_cpu(&cpu);
 
 	// Initialize local variables for user input.
-	bool running   = TRUE;
+	bool running   = true;
 	int input	   = 0;
 	int input_mod1 = 0;
 	int input_mod2 = 0;
 	int breakpoint = 0;
+	ctrl_c_fnd	   = false;
+
+	signal(SIGINT, (_crt_signal_t)sigint_hdlr);
 
 	// Prints the emulator's controls.
 	print_controls();
@@ -57,11 +62,13 @@ int main(int argv, char* argc[])
 		(void)scanf("%i", &input);
 		flush_buffer();
 
+		ctrl_c_fnd = false;	// Resets ctrl-c handler.
+
 		switch (input)
 		{
 			case 1: // Run program.
 				printf("Program execution in progress. Press ctrl+c to halt.\n");
-				while (PC != breakpoint)
+				while (PC != breakpoint && !ctrl_c_fnd)
 				{
 					fetch();
 					execute(cpu.ir, PC);
@@ -106,7 +113,7 @@ int main(int argv, char* argc[])
 				break;
 
 			default: // Exit emulator.
-				running = FALSE;
+				running = false;
 				break;
 		}
 	}

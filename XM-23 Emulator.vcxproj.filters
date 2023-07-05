@@ -15,32 +15,23 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="decode.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="inst_memory.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="memory.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="registers.c">
+    <ClCompile Include="CPU.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="inst_transfer_control.c">
+    <ClCompile Include="instructions.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="inst_2_operand.c">
+    <ClCompile Include="utils.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="utility.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="inst_misc.c">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="header_old.h">
+      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
