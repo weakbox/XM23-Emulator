@@ -12,7 +12,7 @@
 #include <string.h>
 #include <signal.h>
 
-#define VERBOSE
+// #define VERBOSE	// Can be enabled to show instructions as they enter the IR.
 
 #define NEWLINE '\n'
 #define NUL '\0'
@@ -129,7 +129,7 @@ extern void				store_rel(unsigned short dest, unsigned short source, short offse
 extern void				close();
 extern void				appendNewline(char* str);
 extern void				swap_newline(char* str);
-extern int				open_xme_file(FILE* file, int args_num, const char* file_name);
+extern int				open_xme_file(FILE** file, int args_num, const char* file_name);
 extern void				flush_buffer();
 extern void				sigint_hdlr();
 extern void				print_controls();
