@@ -69,6 +69,7 @@
 #define WB(x)						((x >> 6)  & 0x01)
 #define SOURCE(x)					((x >> 3)  & 0x07)
 #define DEST(x)						((x)       & 0x07)
+#define PSW_BITS(x)					((x)       & 0x1F)
 #define PRPO(x)						((x >> 9)  & 0x01)
 #define DEC(x)						((x >> 8)  & 0x01)
 #define INC(x)						((x >> 7)  & 0x01)
@@ -81,6 +82,13 @@
 #define MSBIT_BYTE(x) (((x) >> 7)  & 0x0001)
 #define LSBIT_WORD(x) ((x)         & 0x01)
 #define LSBIT_BYTE(x) ((x)         & 0x01)
+
+// Isolates specific bits in the PSW for the SETCC and CLRCC instrctions.
+#define CARRY(x)	((x) & 0x01)
+#define ZERO(x)		((x >> 1) & 0x01)
+#define NEGATIVE(x)	((x >> 2) & 0x01)
+#define SLEEP(x)	((x >> 3) & 0x01)
+#define OVERFLOW(x) ((x >> 4) & 0x01)
 
 #define PRE	 0
 #define POST 1

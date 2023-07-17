@@ -119,6 +119,7 @@ extern unsigned short	rotate(unsigned short dest, unsigned short wb);
 extern unsigned short	complement(unsigned short dest, unsigned short wb);
 extern unsigned short	swap_byte(unsigned short dest);
 extern unsigned short	sign_extend(unsigned short dest);
+extern void				psw_mod(unsigned short psw_bits, bool clear);
 extern void				load(unsigned short* dest, unsigned short* source, unsigned short prpo, unsigned short dec, unsigned short inc, unsigned short wb);
 extern void				store(unsigned short* dest, unsigned short source, unsigned short prpo, unsigned short dec, unsigned short inc, unsigned short wb);
 extern unsigned short	move(unsigned short dest, unsigned short source, unsigned short wb);

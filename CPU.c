@@ -558,6 +558,27 @@ void execute(unsigned short ir, unsigned short pc)
         regfile[0][DEST(cpu.ir)] = sign_extend(regfile[0][DEST(cpu.ir)]);
         break;
 
+    case SETCC: // Sets PSW bits.
+        #ifdef VERBOSE
+        printf("(SETCC)\n");
+        #endif
+        psw_mod(PSW_BITS(cpu.ir), false);
+        break;
+
+    case CLRCC: // Clears PSW bits.
+        #ifdef VERBOSE
+        printf("(CLRCC)\n");
+        #endif
+        psw_mod(PSW_BITS(cpu.ir), true);
+        break;
+
+    case CEX: // Determines conditional execution.
+        #ifdef VERBOSE
+        printf("(CEX)\n");
+        #endif
+        //exec_conditional();
+        break;
+
     case LD: // Loads data from memory into the destination register at an address specified by the source register.
 #ifdef VERBOSE
         printf("(LD)\n");

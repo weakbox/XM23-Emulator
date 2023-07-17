@@ -384,6 +384,41 @@ unsigned short sign_extend(unsigned short dest)
 	return result;
 }
 
+// Sets or clears bits based on the provided PSW chunk.
+void psw_mod(unsigned short psw_bits, bool clear)
+{
+	// Keep an original 'key' of the bits to modify, in case we need to adjust the bit values.
+	unsigned short key = psw_bits;
+
+	// Complement psw_bits if the instruction is a clear.
+	if (clear)
+	{
+		psw_bits = ~psw_bits;
+	}
+
+	// Modify the PSW bits based on the input.
+	if (CARRY(key))
+	{
+		psw.carry = CARRY(psw_bits);
+	}
+	if (ZERO(key))
+	{
+		psw.zero = ZERO(psw_bits);
+	}
+	if (NEGATIVE(key))
+	{
+		psw.negative = NEGATIVE(psw_bits);
+	}
+	if (SLEEP(key))
+	{
+		psw.sleep = SLEEP(psw_bits);
+	}
+	if (OVERFLOW(key))
+	{
+		psw.overflow = OVERFLOW(psw_bits);
+	}
+}
+
 // Loads memory from the address specified by the source register into the destination register.
 // Can decrement/increment the destination register to allow for indexed addressing. 
 void load(unsigned short* dest, unsigned short* source, unsigned short prpo, unsigned short dec, unsigned short inc, unsigned short wb)
