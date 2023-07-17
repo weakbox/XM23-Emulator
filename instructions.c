@@ -423,8 +423,8 @@ void psw_mod(unsigned short psw_bits, bool clear)
 // Does not modify the PSW.
 void exec_conditional(unsigned short f_count, unsigned short t_count, unsigned short code)
 {
-	unsigned short condition;
-	unsigned short expected;
+	unsigned short condition = -1; // -1 is uninitialized.
+	unsigned short expected = -1;
 
 	// Read the inputted code to determine the condition parameters. 
 	switch (code)

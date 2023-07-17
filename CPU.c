@@ -63,6 +63,7 @@ void print_psw()
 	printf("Carry:    %i\n", psw.carry);
 	printf("Zero:	  %i\n", psw.zero);
 	printf("Negative: %i\n", psw.negative);
+    printf("Sleep:    %i\n", psw.sleep);
 	printf("Overflow: %i\n", psw.overflow);
 }
 
@@ -290,15 +291,15 @@ int decode(unsigned short ir)
                         break;
 
                     case 1:
-                        inst = SVC;
+                        inst = SETCC; // Was SVC.
                         break;
 
                     case 2:
-                        inst = SETCC;
+                        inst = CLRCC; // Was SETCC.
                         break;
 
                     case 3:
-                        inst = CLRCC;
+                        inst = SVC; // Was CLRCC.
                         break;
                     }
                     break;
