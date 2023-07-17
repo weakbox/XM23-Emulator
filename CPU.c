@@ -576,7 +576,7 @@ void execute(unsigned short ir, unsigned short pc)
         #ifdef VERBOSE
         printf("(CEX)\n");
         #endif
-        //exec_conditional();
+        exec_conditional(FALSE(ir), TRUE(ir), CODE(ir));
         break;
 
     case LD: // Loads data from memory into the destination register at an address specified by the source register.

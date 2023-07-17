@@ -10,6 +10,7 @@
 CPU cpu;
 PSW psw;
 Memory mem;
+CEX cex;
 
 unsigned short regfile[2][8] = 
 { 

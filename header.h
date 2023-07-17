@@ -78,9 +78,17 @@ typedef union _WordNib
 	unsigned short word;
 }	WordNib;
 
+// Stores conditional execution counts together in a struct.
+typedef struct _CEX
+{
+	unsigned short false_count:3;
+	unsigned short true_count:3;
+}	CEX;
+
 extern CPU cpu;								// Global emulator CPU.
 extern PSW psw;								// Global emulator PSW.
 extern Memory mem;							// Global emulator memory.
+extern CEX cex;
 extern unsigned short regfile[2][8];		// Global emulator register file.
 extern volatile sig_atomic_t ctrl_c_fnd;	// Ctrl+C signal indicator.
 
@@ -120,6 +128,7 @@ extern unsigned short	complement(unsigned short dest, unsigned short wb);
 extern unsigned short	swap_byte(unsigned short dest);
 extern unsigned short	sign_extend(unsigned short dest);
 extern void				psw_mod(unsigned short psw_bits, bool clear);
+extern void				exec_conditional(unsigned short f_count, unsigned short t_count, unsigned short code);
 extern void				load(unsigned short* dest, unsigned short* source, unsigned short prpo, unsigned short dec, unsigned short inc, unsigned short wb);
 extern void				store(unsigned short* dest, unsigned short source, unsigned short prpo, unsigned short dec, unsigned short inc, unsigned short wb);
 extern unsigned short	move(unsigned short dest, unsigned short source, unsigned short wb);

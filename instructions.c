@@ -419,6 +419,109 @@ void psw_mod(unsigned short psw_bits, bool clear)
 	}
 }
 
+// Sets ignored instruction flags based on the result of the evaluated condition.
+// Does not modify the PSW.
+void exec_conditional(unsigned short f_count, unsigned short t_count, unsigned short code)
+{
+	unsigned short condition;
+	unsigned short expected;
+
+	// Read the inputted code to determine the condition parameters. 
+	switch (code)
+	{
+	case 0: // EQ (equals zero):
+		condition = psw.zero;
+		expected = 1;
+		break;
+	
+	case 1: // NE (does not equal zero):
+		condition = psw.zero;
+		expected = 0;
+		break;
+
+	case 2: // CS/HS (carry set/unsigned higher or same):
+		condition = psw.carry;
+		expected = 1;
+		break;
+
+	case 3: // CC/LO (carry clear/unsigned lower):
+		condition = psw.carry;
+		expected = 0;
+		break;
+
+	case 4: // MI (minus/negative):
+		condition = psw.negative;
+		expected = 1;
+		break;
+
+	case 5: // PL (plus/positive or zero):
+		condition = psw.negative;
+		expected = 0;
+		break;
+
+	case 6: // VS (overflow):
+		condition = psw.overflow;
+		expected = 1;
+		break;
+
+	case 7: // VC (no overflow):
+		condition = psw.overflow;
+		expected = 0;
+		break;
+
+	case 8: // HI (unsigned higher):
+		condition = (psw.carry == 1) && (psw.zero == 0);
+		expected = 1;
+		break;
+
+	case 9: // LS (unsigned lower or same):
+		condition = (psw.carry == 0) || (psw.zero == 1);
+		expected = 1;
+		break;
+
+	case 10: // GE (signed greater than or equal):
+		condition = (psw.negative == psw.overflow);
+		expected = 1;
+		break;
+
+	case 11: // LT (signed less than):
+		condition = (psw.negative != psw.overflow);
+		expected = 1;
+		break;
+
+	case 12: // GT (signed greater than):
+		condition = ((psw.zero == 0) && (psw.negative == psw.overflow));
+		expected = 1;
+		break;
+
+	case 13: // LE (signed less than or equal):
+		condition = ((psw.zero ==10) && (psw.negative != psw.overflow));
+		expected = 1;
+		break;
+
+	case 14: // TR (true part always executed):
+		condition = 1;
+		expected = 1;
+		break;
+
+	case 15: // FL (false part always executed):
+		condition = 0;
+		expected = 1;
+		break;
+	}
+
+	// The condition and expected parameters are now found, determine the result:
+	if (condition == expected)
+	{
+		cex.true_count = t_count;
+		cex.false_count = f_count;
+	}
+	else // (condition != expected)
+	{
+		cex.false_count = f_count;
+	}
+}
+
 // Loads memory from the address specified by the source register into the destination register.
 // Can decrement/increment the destination register to allow for indexed addressing. 
 void load(unsigned short* dest, unsigned short* source, unsigned short prpo, unsigned short dec, unsigned short inc, unsigned short wb)
