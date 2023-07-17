@@ -72,7 +72,21 @@ int main(int argv, char* argc[])
 				while (PC != breakpoint && !ctrl_c_fnd)
 				{
 					fetch();
-					execute(cpu.ir, PC);
+
+					// Execute only occurs if it is not blocked by a CEX instruction.
+					if (cex.true_count <= 0 && cex.false_count > 0)
+					{
+						cex.false_count--;
+					}
+					else
+					{
+						if (cex.true_count > 0)
+						{
+							cex.true_count--;
+						}
+
+						execute(cpu.ir, PC);
+					}
 				}
 				break;
 
