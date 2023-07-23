@@ -45,6 +45,7 @@ void print_controls()
 	printf("5: Print memory contents\n");
 	printf("6: Print register values\n");
 	printf("7: Print PSW\n");
+	printf("8: Print cache\n");
 	printf("0: Exit emulator\n");
 }
 

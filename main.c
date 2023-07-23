@@ -63,6 +63,7 @@ int main(int argv, char* argc[])
 	// Instructions have been loaded into virtual memory.
 	// Initialize the CPU's internal registers.
 	initialize_cpu(&cpu);
+	cache_init();
 
 	// Initialize local variables for user input.
 	bool running   = true;
@@ -141,6 +142,10 @@ int main(int argv, char* argc[])
 
 			case 7:	// Print PSW.
 				print_psw();
+				break;
+
+			case 8: // Print cache.
+				cache_print();
 				break;
 
 			default: // Exit emulator.
