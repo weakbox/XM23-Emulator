@@ -12,7 +12,7 @@
 #include <string.h>
 #include <signal.h>
 
-#define VERBOSE	// Can be enabled to show instructions as they enter the IR.
+//#define VERBOSE	// Can be enabled to show instructions as they enter the IR.
 
 #define NEWLINE '\n'
 #define NUL '\0'
