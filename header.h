@@ -148,3 +148,4 @@ extern unsigned short	combine_bytes(unsigned short msb, unsigned short lsb);
 // Functions defined in "cache.c"
 extern void cache_init();
 extern void cache_print();
+extern void cache_search(unsigned short mar, unsigned short* mbr, int rw, int wb);

@@ -119,7 +119,7 @@ void print_reg(unsigned short regfile[2][8])
 void fetch()
 {
 	cpu.mar = PC;
-	bus(cpu.mar, &cpu.mbr, READ, WORD);
+	cache_search(cpu.mar, &cpu.mbr, READ, WORD);
 	cpu.ir = cpu.mbr;
 	PC += 2;
 	cpu.clock++;

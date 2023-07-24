@@ -5,8 +5,7 @@
   Description: Functions related to the CPU cache.
 */
 
-#include <stdio.h>
-#include <stdbool.h>
+#include "header.h"
 
 #define CACHE_SIZE 32
 
@@ -79,34 +78,41 @@ int cache_overwrite_associative(int address_new)
 			lru_pos = i;
 		}
 	}
-	cache[lru_pos].address = address_new;
+	// Need to use the CPU bus to retrive the data at the new specified address.
+	cpu.mar = address_new;
+	bus(cpu.mar, &cpu.mbr, READ, WORD);
+	cache[lru_pos].address = cpu.mar; /* New cache line address. */
+	cache[lru_pos].data = cpu.mbr;	  /* New cache line data. */
 	return lru_pos;
 }
 
 // Searches and updates the cache using the associative organization method.
-void cache_search_associative(unsigned short address)
+// Returns the cache line that contains the data at the requested address.
+int cache_search_associative(unsigned short address)
 {
-	bool hit = false;
-	unsigned short hit_cache_line;
+	bool cache_hit = false;
+	unsigned short cache_hit_line;
 
 	// Determine if the requested address resides in cache.
 	for (int i = 0; i < CACHE_SIZE; i++)
 	{
 		if (cache[i].address == address)
 		{
-			hit = true;
-			hit_cache_line = i;
+			cache_hit = true;
+			cache_hit_line = i;
 		}
 	}
 	// Update cache depending on whether the address was found or not.
-	if (hit)
+	if (cache_hit)
 	{
-		cache_dec_associative(address);
+		cache_dec_associative(cache_hit_line); /* Sets hit as maximum usage. Decrements cache usage. */
 	}
 	else // Miss.
 	{
-		cache_dec_associative(cache_overwrite_associative(address));
+		cache_hit_line = cache_overwrite_associative(address); /* Overwrites the LRU cache line. */
+		cache_dec_associative(cache_hit_line);  /* Sets "hit" as maximum usage. Decrements cache usage. */
 	}
+	return cache_hit_line;
 }
 
 // Searches the cache.
@@ -116,6 +122,7 @@ void cache_search(unsigned short mar, unsigned short* mbr, int rw, int wb)
 {
 	// Determines the cache organization method that will be used.
 	int cache_org = ASSOCIATIVE;
+	int cache_hit_line;
 	switch (cache_org)
 	{
 	case DIRECT:
@@ -123,11 +130,42 @@ void cache_search(unsigned short mar, unsigned short* mbr, int rw, int wb)
 		break;
 
 	case ASSOCIATIVE:
-		cache_search_associative(mar);
+		cache_hit_line = cache_search_associative(mar);
 		break;
 
 	case N_WAY:
 		// Bonus.
 		break;
 	}
+
+	// Perform the read/write operation using the cache.
+	switch (rw)
+	{
+	case READ:
+		switch (wb)
+		{
+		case WORD:
+			cpu.mbr = cache[cache_hit_line].data;
+			break;
+
+		case BYTE:
+			cpu.mbr = cache[cache_hit_line].data; /* Needs to be conveted to the LSByte. */
+			break;
+		}
+		break;
+
+	case WRITE:
+		switch (wb)
+		{
+		case WORD:
+			cache[cache_hit_line].data = cpu.mbr;
+			break;
+
+		case BYTE:
+			cache[cache_hit_line].data = cpu.mbr; /* Needs to be conveted to the LSByte. */
+			break;
+		}
+		break;
+	}
+
 }
