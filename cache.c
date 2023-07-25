@@ -69,22 +69,22 @@ void cache_config(int org, int pol)
 // Searches the cache for a targeted address using the direct mapping organization method.
 // Returns the index of the cache line that was searched.
 // Sets the hit flag if the targeted address was found.
-int cache_search_direct(bool* hit)
+int cache_search_direct(unsigned short target_address, bool* hit)
 {
 	// Determine the key (index). Value is a range from 0 to CACHE_SIZE - 1.
-	// MAR must be halved as MAR will always be an even number.
-	int i = (cpu.mar/2) % CACHE_SIZE;
+	// Target address must be halved as it will always be an even number.
+	int i = (target_address/2) % CACHE_SIZE;
 
-	if (cache[i].address == cpu.mar)
+	if (cache[i].address == target_address)
 	{
 		*hit = true;
 	}
 	return i;
 }
 
-// Decrements the usage value of all cache lines with usages greater than 0.
+// Decrements the usage of all cache lines with usages greater than 0.
 // Sets the most recently accessed cache line to the maximum usage value.
-void cache_dec_associative(int recent)
+void cache_dec_associative(int mru)
 {
 	for (int i = 0; i < CACHE_SIZE; i++)
 	{
@@ -93,53 +93,51 @@ void cache_dec_associative(int recent)
 			cache[i].usage--;
 		}
 	}
-	cache[recent].usage = CACHE_SIZE - 1;
+	cache[mru].usage = CACHE_SIZE - 1;
 }
 
-// Overwrites the least recently used cache line.
-// Returns the position of the overwritten cache line.
-int cache_overwrite_associative(int address_new)
+// Determines the index of the LRU cache line.
+// Returns the index of the LRU cache line.
+int cache_find_lru_associative()
 {
 	int lru = CACHE_SIZE;
-	int lru_pos;
+	int lru_idx = CACHE_SIZE;
+
+	// Performs a linear search through the cache to determine the LRU cache line.
 	for (int i = 0; i < CACHE_SIZE; i++)
 	{
 		if (cache[i].usage < lru)
 		{
 			lru = cache[i].usage;
-			lru_pos = i;
+			lru_idx = i;
 		}
 	}
-	return lru_pos;
+	return lru_idx;
 }
 
 // Searches and updates the cache using the associative organization method.
-// Returns the cache line that contains the data at the requested address.
+// Returns the index of the cache line that either contained the target address or should be overwritten.
 // Sets the hit flag if the targeted address was found.
-int cache_search_associative(unsigned short address, bool* hit)
+int cache_search_associative(unsigned short target_address, bool* hit)
 {
-	unsigned short cache_hit_line;
+	unsigned short target_index;
 
 	// Determine if the requested address resides in cache.
 	for (int i = 0; i < CACHE_SIZE; i++)
 	{
-		if (cache[i].address == address)
+		if (cache[i].address == target_address)
 		{
 			*hit = true;
-			cache_hit_line = i;
+			target_index = i;
 		}
 	}
-	// Determine cache line to be modified depending on whether the address was found or not.
-	if (*hit)
+	// If a miss occurred, the index of the cache line to overwrite must be determined.
+	if (*hit == false)
 	{
-		cache_dec_associative(cache_hit_line); /* Sets hit as maximum usage. Decrements cache usage. */
+		target_index = cache_find_lru_associative();
 	}
-	else // Miss.
-	{
-		cache_hit_line = cache_overwrite_associative(address); /* Overwrites the LRU cache line. */
-		cache_dec_associative(cache_hit_line);  /* Sets "hit" as maximum usage. Decrements cache usage. */
-	}
-	return cache_hit_line;
+	cache_dec_associative(target_index);
+	return target_index;
 }
 
 // Reads cache data from the provided cache index.
@@ -149,7 +147,7 @@ void cache_read(int idx, bool hit)
 	if (hit)
 	{
 		#ifdef VERBOSE
-		printf("[CACHE] Read hit detected.\n");
+		printf("[CACHE] Read hit!\n");
 		#endif
 		cpu.mbr = cache[idx].data;
 	}
@@ -179,7 +177,7 @@ void cache_write(int idx, bool hit)
 		if (hit)
 		{
 			#ifdef VERBOSE
-			printf("[CACHE] Write hit detected (write-back).\n");
+			printf("[CACHE] Write hit!\n");
 			#endif	
 		}
 		else /* Miss. If dirty bit is set, contents of evicted cache line are written to main memory. */
@@ -198,7 +196,7 @@ void cache_write(int idx, bool hit)
 		if (hit)
 		{
 			#ifdef VERBOSE
-			printf("[CACHE] Write hit detected (write-through).\n");
+			printf("[CACHE] Write hit!.\n");
 			#endif			
 		}
 		// A write using the write-through policy always results in the data being written to main memory.
@@ -216,6 +214,8 @@ void cache_write(int idx, bool hit)
 // The CPU's MAR specifies the address that we are to search for.
 void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 {
+	unsigned short target_address = mar; /* Address to be searched for in cache. */
+
 	int idx = 0;	  /* Index of the cache line containing the targeted address. Assumed that it will be initialized elsewhere. */
 	bool hit = false; /* Flag indicating if the targeted address was found in cache. Assumed false. */
 
@@ -223,18 +223,17 @@ void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 	switch (organization_method)
 	{
 	case DIRECT:
-		idx = cache_search_direct(&hit);
+		idx = cache_search_direct(target_address, &hit);
 		break;
 
 	case ASSOCIATIVE:
-		idx = cache_search_associative(mar, &hit);
+		idx = cache_search_associative(target_address, &hit);
 		break;
 
 	case N_WAY:
 		// Bonus.
 		break;
 	}
-	// After this switch case, it is assumed that idx contains the index of the cache line containing the targeted address.
 	// Perform modifications to the cache.
 	switch (rw)
 	{
