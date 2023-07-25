@@ -25,6 +25,8 @@
 
 #define MEMORY_SIZE 65536	// Memory size in bytes.
 
+#define CACHE_SIZE 32
+
 #define BP regfile[0][4]	// R4 -> Base Pointer
 #define LR regfile[0][5]	// R5 -> Link Register
 #define SP regfile[0][6]	// R6 -> Stack Pointer
@@ -146,7 +148,7 @@ extern void				print_controls();
 extern unsigned short	combine_bytes(unsigned short msb, unsigned short lsb);
 
 // Functions defined in "cache.c"
-extern void cache_init();
-extern void cache_print();
+extern void cache_init(int cache_size);
+extern void cache_print(int cache_size);
 extern void cache_config(int org, int pol);
 extern void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb);

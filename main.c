@@ -63,7 +63,7 @@ int main(int argv, char* argc[])
 	// Instructions have been loaded into virtual memory.
 	// Initialize the CPU's internal registers.
 	initialize_cpu(&cpu);
-	cache_init();
+	cache_init(CACHE_SIZE);
 
 	// Initialize local variables for user input.
 	bool running   = true;
@@ -145,7 +145,7 @@ int main(int argv, char* argc[])
 				break;
 
 			case 8: // Print cache.
-				cache_print();
+				cache_print(CACHE_SIZE);
 				break;
 
 			case 9:

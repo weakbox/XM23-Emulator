@@ -7,7 +7,8 @@
 
 #include "header.h"
 
-#define CACHE_SIZE 32
+enum organization { DIRECT, ASSOCIATIVE, N_WAY };
+enum replacement_policy { WRITE_BACK, WRITE_THROUGH };
 
 typedef struct _CacheLine
 {
@@ -20,16 +21,14 @@ typedef struct _CacheLine
 // Create an array of cachelines to represent the full cache.
 CacheLine cache[CACHE_SIZE];
 
-enum organization { DIRECT, ASSOCIATIVE, N_WAY };
-enum replacement_policy { WRITE_BACK, WRITE_THROUGH };
+int organization_method = DIRECT;	 /* Global to specify the cache organization method. */
+int replacement_policy = WRITE_BACK; /* Global to specify the cache replacement policy. */
 
-int organization_method = DIRECT;
-int replacement_policy = WRITE_BACK;
-
-// Initializes the cache to zero.
-void cache_init()
+// Initializes the contents of each cache line to zero.
+// Assumes initialization was successful.
+void cache_init(int cache_size)
 {
-	for (int i = 0; i < CACHE_SIZE; i++)
+	for (int i = 0; i < cache_size; i++)
 	{
 		cache[i].address = 0;
 		cache[i].data = 0;
@@ -38,36 +37,38 @@ void cache_init()
 	}
 }
 
-// Prints the contents of the cache.
-void cache_print()
+// Prints the contents of each cache line.
+void cache_print(int cache_size)
 {
-	printf("Printing cache...\n");
-	for (int i = 0; i < CACHE_SIZE; i++)
+	printf("Printing %i cache lines...\n", cache_size);
+	for (int i = 0; i < cache_size; i++)
 	{
 		printf("%02i: %04x %04x %02i %i\n", i, cache[i].address, cache[i].data, cache[i].usage, cache[i].dirty);
 	}
 }
 
-// Allows the user to modify the cache organization method and the cache replacement policy.
+// Allows the user to modify the cache organization method and the cache replacement policy settings.
+// Will reinitialize the cache if these settings have been modified.
 void cache_config(int org, int pol)
 {
 	if (org != organization_method || pol != replacement_policy) /* Cache organization method and/or replacement policy have changed. */
 	{
-		cache_init(); /* Re-initialize the cache to avoid errors. */
-		organization_method = org;
-		replacement_policy = pol;
-		printf("Cache settings have been changed.\n");
-		printf("Cache has been re-initialized.\n");
+		printf("Cache settings were modified.\n");
+		cache_init(CACHE_SIZE);    /* Re-initialize the cache to avoid errors. */
+		organization_method = org; /* Organization method global settings are changed. */
+		replacement_policy = pol;  /* Replacement policy global settings are changed.*/
+		printf("Cache has been reinitialized.\n");
 	}
 	else
 	{
-		printf("No settings were changed.\n");
+		printf("Cache settings were not modified.\n");
+		printf("Cache has not been reinitialized.\n");
 	}
 }
 
 // Searches the cache for a targeted address using the direct mapping organization method.
 // Returns the index of the cache line that was searched.
-// Modifies the hit flag if the targeted address was found.
+// Sets the hit flag if the targeted address was found.
 int cache_search_direct(bool* hit)
 {
 	// Determine the key (index). Value is a range from 0 to CACHE_SIZE - 1.
@@ -114,7 +115,7 @@ int cache_overwrite_associative(int address_new)
 
 // Searches and updates the cache using the associative organization method.
 // Returns the cache line that contains the data at the requested address.
-// Modifies the hit flag if the targeted address was found.
+// Sets the hit flag if the targeted address was found.
 int cache_search_associative(unsigned short address, bool* hit)
 {
 	unsigned short cache_hit_line;
@@ -171,6 +172,7 @@ void cache_read(int idx, bool hit)
 // Can use write-back or write-through replacement policies (defaults to write-back).
 void cache_write(int idx, bool hit)
 {
+	// Policy determines how main memory will be updated when a write occurs.
 	switch (replacement_policy)
 	{
 	case WRITE_BACK:
@@ -178,21 +180,18 @@ void cache_write(int idx, bool hit)
 		{
 			#ifdef VERBOSE
 			printf("[CACHE] Write hit detected (write-back).\n");
-			#endif
-			cache[idx].data = cpu.mbr;
-			cache[idx].dirty = true;
+			#endif	
 		}
-		else /* Miss. May have to write contents of evicted cache line to main memory. */
+		else /* Miss. If dirty bit is set, contents of evicted cache line are written to main memory. */
 		{
 			if (cache[idx].dirty)
 			{
-				// Should use bus function!
-				mem.word[cache[idx].address] = cache[idx].data; /* Contents of evicted cache line are written to main memory. */
+				// This should use the CPU bus!!!
+				mem.word[cache[idx].address] = cache[idx].data;
 			}
-			cache[idx].address = cpu.mar;
-			cache[idx].data = cpu.mbr;
-			cache[idx].dirty = true;
 		}
+		// A write using the write-back policy always results in the dirty bit being set.
+		cache[idx].dirty = true;
 		break;
 
 	case WRITE_THROUGH:
@@ -200,18 +199,16 @@ void cache_write(int idx, bool hit)
 		{
 			#ifdef VERBOSE
 			printf("[CACHE] Write hit detected (write-through).\n");
-			#endif
-			cache[idx].data = cpu.mbr;
-			mem.word[cpu.mar] = cpu.mbr; /* Should use bus! */
+			#endif			
 		}
-		else /* Miss. */
-		{
-			cache[idx].address = cpu.mar;
-			cache[idx].data = cpu.mbr;
-			mem.word[cpu.mar] = cpu.mbr; /* Should use bus! */
-		}
+		// A write using the write-through policy always results in the data being written to main memory.
+		// This should use the CPU bus!!!
+		mem.word[cpu.mar] = cpu.mbr;
 		break;
 	}
+	// Regardless of policy, the cache line specified by the index is always written to.
+	cache[idx].address = cpu.mar;
+	cache[idx].data = cpu.mbr;
 }
 
 // Searches the cache.
@@ -220,7 +217,7 @@ void cache_write(int idx, bool hit)
 void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 {
 	int idx = 0;	  /* Index of the cache line containing the targeted address. Assumed that it will be initialized elsewhere. */
-	bool hit = false; /* Bool indicating if the targeted address was found in cache. Assumed false. */
+	bool hit = false; /* Flag indicating if the targeted address was found in cache. Assumed false. */
 
 	// Determine the cache organization method that will be used.
 	switch (organization_method)
