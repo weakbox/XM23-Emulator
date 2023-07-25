@@ -534,7 +534,7 @@ void load(unsigned short* dest, unsigned short* source, unsigned short prpo, uns
 			*source -= 2 * dec;
 			*source += 2 * inc;
 			cpu.mar = *source;
-			bus(cpu.mar, &cpu.mbr, READ, WORD);
+			cache_bus(cpu.mar, &cpu.mbr, READ, WORD);
 			*dest = cpu.mbr;
 		}
 		else /* wb == BYTE */
@@ -542,7 +542,7 @@ void load(unsigned short* dest, unsigned short* source, unsigned short prpo, uns
 			*source -= dec;
 			*source += inc;
 			cpu.mar = *source;
-			bus(cpu.mar, &cpu.mbr, READ, BYTE);
+			cache_bus(cpu.mar, &cpu.mbr, READ, BYTE);
 			*dest = cpu.mbr;
 		}
 		break;
@@ -551,7 +551,7 @@ void load(unsigned short* dest, unsigned short* source, unsigned short prpo, uns
 		if (wb == WORD)
 		{
 			cpu.mar = *source;
-			bus(cpu.mar, &cpu.mbr, READ, WORD);
+			cache_bus(cpu.mar, &cpu.mbr, READ, WORD);
 			*dest = cpu.mbr;
 			*source -= 2 * dec;
 			*source += 2 * inc;
@@ -559,7 +559,7 @@ void load(unsigned short* dest, unsigned short* source, unsigned short prpo, uns
 		else /* wb == BYTE */
 		{
 			cpu.mar = *source;
-			bus(cpu.mar, &cpu.mbr, READ, BYTE);
+			cache_bus(cpu.mar, &cpu.mbr, READ, BYTE);
 			*dest = cpu.mbr;
 			*source -= dec;
 			*source += inc;
@@ -590,7 +590,7 @@ void store(unsigned short* dest, unsigned short source, unsigned short prpo, uns
 			*dest += inc;
 			cpu.mar = *dest;
 			cpu.mbr = source;
-			bus(cpu.mar, &cpu.mbr, WRITE, BYTE);
+			cache_bus(cpu.mar, &cpu.mbr, WRITE, BYTE);
 			break;
 		}
 		break;
@@ -609,7 +609,7 @@ void store(unsigned short* dest, unsigned short source, unsigned short prpo, uns
 		case BYTE:
 			cpu.mar = *dest;
 			cpu.mbr = source;
-			bus(cpu.mar, &cpu.mbr, WRITE, BYTE);
+			cache_bus(cpu.mar, &cpu.mbr, WRITE, BYTE);
 			*dest -= dec;
 			*dest += inc;
 			break;
@@ -638,13 +638,13 @@ void load_rel(unsigned short* dest, unsigned short source, short offset, unsigne
 	{
 	case WORD:
 		cpu.mar = source + offset;
-		bus(cpu.mar, &cpu.mbr, READ, WORD);
+		cache_bus(cpu.mar, &cpu.mbr, READ, WORD);
 		*dest = cpu.mbr;
 		break;
 
 	case BYTE:
 		cpu.mar = source + offset;
-		bus(cpu.mar, &cpu.mbr, READ, BYTE);
+		cache_bus(cpu.mar, &cpu.mbr, READ, BYTE);
 		*dest = cpu.mbr;
 		break;
 	}
@@ -665,13 +665,13 @@ void store_rel(unsigned short dest, unsigned short source, short offset, unsigne
 	case WORD:
 		cpu.mar = dest + offset;
 		cpu.mbr = source;
-		bus(cpu.mar, &cpu.mbr, WRITE, WORD);
+		cache_bus(cpu.mar, &cpu.mbr, WRITE, WORD);
 		break;
 
 	case BYTE:
 		cpu.mar = dest + offset;
 		cpu.mbr = source;
-		bus(cpu.mar, &cpu.mbr, WRITE, BYTE);
+		cache_bus(cpu.mar, &cpu.mbr, WRITE, BYTE);
 		break;
 	}
 }

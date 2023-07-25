@@ -142,7 +142,7 @@ int cache_search_associative(unsigned short target_address, bool* hit)
 
 // Reads cache data from the provided cache index.
 // Replaces address and data in the targeted cache line if a miss has been specified.
-void cache_read(unsigned short target_address, int idx, bool hit)
+void cache_read(unsigned short target_address, int wb, int idx, bool hit)
 {
 	if (hit)
 	{
@@ -162,7 +162,7 @@ void cache_read(unsigned short target_address, int idx, bool hit)
 		}
 		// Read contents of memory address from main memory.
 		cpu.mar = target_address;
-		bus(cpu.mar, &cpu.mbr, READ, WORD);
+		bus(cpu.mar, &cpu.mbr, READ, (wb == WORD) ? WORD : BYTE);
 
 		// Store contents of memory address into cache line.
 		cache[idx].address = cpu.mar;
@@ -174,7 +174,7 @@ void cache_read(unsigned short target_address, int idx, bool hit)
 // Writes cache data to the provided cache index.
 // Replaces address and data in the targeted cache line if a miss has been specified.
 // Can use write-back or write-through replacement policies (defaults to write-back).
-void cache_write(unsigned short target_address, unsigned short target_buffer, int idx, bool hit)
+void cache_write(unsigned short target_address, unsigned short target_data, int wb, int idx, bool hit)
 {
 	// Policy determines how main memory will be updated when a write occurs.
 	switch (replacement_policy)
@@ -197,7 +197,7 @@ void cache_write(unsigned short target_address, unsigned short target_buffer, in
 			}
 			// Return target address and buffer to the CPU.
 			cpu.mar = target_address;
-			cpu.mbr = target_buffer;
+			cpu.mbr = target_data;
 		}
 		// A write using the write-back policy always results in the dirty bit being set.
 		cache[idx].dirty = true;
@@ -211,7 +211,7 @@ void cache_write(unsigned short target_address, unsigned short target_buffer, in
 			#endif			
 		}
 		// A write using the write-through policy always results in the data being written to main memory.
-		bus(cpu.mar, &cpu.mbr, WRITE, WORD);
+		bus(cpu.mar, &cpu.mbr, WRITE, (wb == WORD) ? WORD : BYTE);
 		break;
 	}
 	// Regardless of policy, the cache line specified by the index is always written to.
@@ -225,7 +225,7 @@ void cache_write(unsigned short target_address, unsigned short target_buffer, in
 void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 {
 	unsigned short target_address = mar; /* Address to be searched for in cache. */
-	unsigned short target_buffer = *mbr; /* Buffer. Only used during a write operation. */
+	unsigned short target_data = *mbr; /* Contents of data to be written. Only used during a write operation. */
 
 	int idx = 0;	  /* Index of the cache line containing the targeted address. Assumed that it will be initialized elsewhere. */
 	bool hit = false; /* Flag indicating if the targeted address was found in cache. Assumed false. */
@@ -249,11 +249,11 @@ void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 	switch (rw)
 	{
 	case READ:
-		cache_read(target_address, idx, hit);
+		cache_read(target_address, wb, idx, hit);
 		break;
 
 	case WRITE:
-		cache_write(target_address, target_buffer, idx, hit);
+		cache_write(target_address, target_data, wb, idx, hit);
 		break;
 	}
 }
