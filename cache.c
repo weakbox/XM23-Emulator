@@ -7,6 +7,9 @@
 
 #include "header.h"
 
+#define LSBYTE(x) ((x)      & 0xFF)
+#define MSBYTE(x) ((x >> 8) & 0xFF)
+
 #define CACHE_SIZE 32
 
 typedef struct _CacheLine
@@ -21,6 +24,7 @@ typedef struct _CacheLine
 CacheLine cache[CACHE_SIZE];
 
 enum organization { DIRECT, ASSOCIATIVE, N_WAY };
+enum replacement_policy { WRITE_BACK, WRITE_THROUGH };
 
 // Initializes the cache to zero.
 void cache_init()
@@ -44,10 +48,19 @@ void cache_print()
 	}
 }
 
-// Searches and updates the cache using the direct mapping organization method.
-void cache_search_direct(unsigned short address)
+// Searches the cache for a targeted address using the direct mapping organization method.
+// Returns the index of the cache line that was searched.
+// Modifies the found flag if the targeted address was found.
+int cache_search_direct(bool* found)
 {
+	// Determine the key (index). Value is a range from 0 to CACHE_SIZE - 1.
+	int i = cpu.mar % CACHE_SIZE;
 
+	if (cache[i].address == cpu.mar)
+	{
+		*found = true;
+	}
+	return i;
 }
 
 // Decrements the usage value of all cache lines with usages greater than 0.
@@ -78,11 +91,6 @@ int cache_overwrite_associative(int address_new)
 			lru_pos = i;
 		}
 	}
-	// Need to use the CPU bus to retrive the data at the new specified address.
-	cpu.mar = address_new;
-	bus(cpu.mar, &cpu.mbr, READ, WORD);
-	cache[lru_pos].address = cpu.mar; /* New cache line address. */
-	cache[lru_pos].data = cpu.mbr;	  /* New cache line data. */
 	return lru_pos;
 }
 
@@ -118,54 +126,79 @@ int cache_search_associative(unsigned short address)
 // Searches the cache.
 // Can utilize a varity of cache organization methods based on the user input.
 // The CPU's MAR specifies the address that we are to search for.
-void cache_search(unsigned short mar, unsigned short* mbr, int rw, int wb)
+void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 {
-	// Determines the cache organization method that will be used.
-	int cache_org = ASSOCIATIVE;
-	int cache_hit_line;
-	switch (cache_org)
+	int idx;		  /* Index of the cache line containing the targeted address. Assumed that it will be initialized. */
+	bool hit = false; /* Bool indicating if the targeted address was found in cache. Assumed false. */
+
+	// Determine the cache organization method that will be used.
+	switch (DIRECT)
 	{
 	case DIRECT:
-		cache_search_direct(mar);
+		idx = cache_search_direct(&hit);
 		break;
 
 	case ASSOCIATIVE:
-		cache_hit_line = cache_search_associative(mar);
+		idx = cache_search_associative(mar);
 		break;
 
 	case N_WAY:
 		// Bonus.
 		break;
 	}
-
-	// Perform the read/write operation using the cache.
+	// After this switch case, it is assumed that idx contains the index of the cache line containing the targeted address.
+	// Perform modifications to the cache.
 	switch (rw)
 	{
 	case READ:
-		switch (wb)
+		if (hit)
 		{
-		case WORD:
-			cpu.mbr = cache[cache_hit_line].data;
-			break;
-
-		case BYTE:
-			cpu.mbr = cache[cache_hit_line].data; /* Needs to be conveted to the LSByte. */
-			break;
+			mbr = cache[idx].data;
+		}
+		else /* Miss. Have to fetch data from main memory. */
+		{
+			bus(mar, mbr, READ, WORD);
+			cache[idx].address = mar;
+			cache[idx].data = mbr;
+			cache[idx].dirty = false;
 		}
 		break;
 
 	case WRITE:
-		switch (wb)
+		switch (WRITE_BACK)
 		{
-		case WORD:
-			cache[cache_hit_line].data = cpu.mbr;
+		case WRITE_BACK:
+			if (hit)
+			{
+				cache[idx].data = mbr;
+				cache[idx].dirty = true;
+			}
+			else /* Miss. May have to write contents of evicted cache line to main memory. */
+			{
+				if (cache[idx].dirty)
+				{
+					mem.word[cache[idx].address] = cache[idx].data; /* Contents of evicted cache line are written to main memory. */
+				}
+				cache[idx].address = mar;
+				cache[idx].data = mbr;
+				cache[idx].dirty = true;
+			}
 			break;
 
-		case BYTE:
-			cache[cache_hit_line].data = cpu.mbr; /* Needs to be conveted to the LSByte. */
+		case WRITE_THROUGH:
+			if (hit)
+			{
+				cache[idx].data = mbr;
+				mem.word[mar] = mbr;
+			}
+			else /* Miss. */
+			{
+				cache[idx].address = mar;
+				cache[idx].data = mbr;
+				mem.word[mar] = mbr;
+			}
 			break;
 		}
 		break;
 	}
-
 }
