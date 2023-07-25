@@ -67,7 +67,7 @@ void cache_config(int org, int pol)
 
 // Searches the cache for a targeted address using the direct mapping organization method.
 // Returns the index of the cache line that was searched.
-// Modifies the found flag if the targeted address was found.
+// Modifies the hit flag if the targeted address was found.
 int cache_search_direct(bool* hit)
 {
 	// Determine the key (index). Value is a range from 0 to CACHE_SIZE - 1.
@@ -114,6 +114,7 @@ int cache_overwrite_associative(int address_new)
 
 // Searches and updates the cache using the associative organization method.
 // Returns the cache line that contains the data at the requested address.
+// Modifies the hit flag if the targeted address was found.
 int cache_search_associative(unsigned short address, bool* hit)
 {
 	unsigned short cache_hit_line;
@@ -145,8 +146,8 @@ int cache_search_associative(unsigned short address, bool* hit)
 // The CPU's MAR specifies the address that we are to search for.
 void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 {
-	int idx = CACHE_SIZE; /* Index of the cache line containing the targeted address. Assumed that it will be initialized. */
-	bool hit = false;	  /* Bool indicating if the targeted address was found in cache. Assumed false. */
+	int idx = 0;	  /* Index of the cache line containing the targeted address. Assumed that it will be initialized elsewhere. */
+	bool hit = false; /* Bool indicating if the targeted address was found in cache. Assumed false. */
 
 	// Determine the cache organization method that will be used.
 	switch (organization_method)
@@ -171,12 +172,17 @@ void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 		if (hit)
 		{
 			#ifdef VERBOSE
-			printf("[CACHE] Hit detected.\n");
+			printf("[CACHE] Read hit detected.\n");
 			#endif
 			*mbr = cache[idx].data;
 		}
 		else /* Miss. Have to fetch data from main memory. */
 		{
+			if (cache[idx].dirty)
+			{
+				// Should use bus function!
+				mem.word[cache[idx].address] = cache[idx].data; /* Contents of evicted cache line are written to main memory. */
+			}
 			bus(mar, mbr, READ, WORD);
 			cache[idx].address = mar;
 			cache[idx].data = *mbr;
@@ -190,6 +196,9 @@ void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 		case WRITE_BACK:
 			if (hit)
 			{
+				#ifdef VERBOSE
+				printf("[CACHE] Write hit detected (write-back).\n");
+				#endif
 				cache[idx].data = *mbr;
 				cache[idx].dirty = true;
 			}
@@ -209,17 +218,21 @@ void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 		case WRITE_THROUGH:
 			if (hit)
 			{
+				#ifdef VERBOSE
+				printf("[CACHE] Write hit detected (write-through).\n");
+				#endif
 				cache[idx].data = *mbr;
-				mem.word[mar] = *mbr;
+				mem.word[mar] = *mbr; /* Should use bus! */
 			}
 			else /* Miss. */
 			{
 				cache[idx].address = mar;
 				cache[idx].data = *mbr;
-				mem.word[mar] = *mbr;
+				mem.word[mar] = *mbr; /* Should use bus! */
 			}
 			break;
 		}
+
 		break;
 	}
 }

@@ -582,7 +582,7 @@ void store(unsigned short* dest, unsigned short source, unsigned short prpo, uns
 			*dest += (2 * inc);
 			cpu.mar = *dest;
 			cpu.mbr = source;
-			bus(cpu.mar, &cpu.mbr, WRITE, WORD);
+			cache_bus(cpu.mar, &cpu.mbr, WRITE, WORD);
 			break;
 
 		case BYTE:
@@ -601,7 +601,7 @@ void store(unsigned short* dest, unsigned short source, unsigned short prpo, uns
 		case WORD:
 			cpu.mar = *dest;
 			cpu.mbr = source;
-			bus(cpu.mar, &cpu.mbr, WRITE, WORD);
+			cache_bus(cpu.mar, &cpu.mbr, WRITE, WORD);
 			*dest -= (2 * dec);
 			*dest += (2 * inc);
 			break;
