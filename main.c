@@ -148,6 +148,14 @@ int main(int argv, char* argc[])
 				cache_print();
 				break;
 
+			case 9:
+				printf("Enter new cache settings: <org> <pol>\n");
+				printf("Input: ");
+				(void)scanf("%i %i", &input_mod1, &input_mod2);
+				flush_buffer();
+				cache_config(input_mod1, input_mod2);
+				break;
+
 			default: // Exit emulator.
 				running = false;
 				break;

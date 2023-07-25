@@ -7,9 +7,6 @@
 
 #include "header.h"
 
-#define LSBYTE(x) ((x)      & 0xFF)
-#define MSBYTE(x) ((x >> 8) & 0xFF)
-
 #define CACHE_SIZE 32
 
 typedef struct _CacheLine
@@ -25,6 +22,9 @@ CacheLine cache[CACHE_SIZE];
 
 enum organization { DIRECT, ASSOCIATIVE, N_WAY };
 enum replacement_policy { WRITE_BACK, WRITE_THROUGH };
+
+int organization_method = DIRECT;
+int replacement_policy = WRITE_BACK;
 
 // Initializes the cache to zero.
 void cache_init()
@@ -48,10 +48,27 @@ void cache_print()
 	}
 }
 
+// Allows the user to modify the cache organization method and the cache replacement policy.
+void cache_config(int org, int pol)
+{
+	if (org != organization_method || pol != replacement_policy) /* Cache organization method and/or replacement policy have changed. */
+	{
+		cache_init(); /* Re-initialize the cache to avoid errors. */
+		organization_method = org;
+		replacement_policy = pol;
+		printf("Cache settings have been changed.\n");
+		printf("Cache has been re-initialized.\n");
+	}
+	else
+	{
+		printf("No settings were changed.\n");
+	}
+}
+
 // Searches the cache for a targeted address using the direct mapping organization method.
 // Returns the index of the cache line that was searched.
 // Modifies the found flag if the targeted address was found.
-int cache_search_direct(bool* found)
+int cache_search_direct(bool* hit)
 {
 	// Determine the key (index). Value is a range from 0 to CACHE_SIZE - 1.
 	// MAR must be halved as MAR will always be an even number.
@@ -59,7 +76,7 @@ int cache_search_direct(bool* found)
 
 	if (cache[i].address == cpu.mar)
 	{
-		*found = true;
+		*hit = true;
 	}
 	return i;
 }
@@ -97,9 +114,8 @@ int cache_overwrite_associative(int address_new)
 
 // Searches and updates the cache using the associative organization method.
 // Returns the cache line that contains the data at the requested address.
-int cache_search_associative(unsigned short address)
+int cache_search_associative(unsigned short address, bool* hit)
 {
-	bool cache_hit = false;
 	unsigned short cache_hit_line;
 
 	// Determine if the requested address resides in cache.
@@ -107,12 +123,12 @@ int cache_search_associative(unsigned short address)
 	{
 		if (cache[i].address == address)
 		{
-			cache_hit = true;
+			*hit = true;
 			cache_hit_line = i;
 		}
 	}
-	// Update cache depending on whether the address was found or not.
-	if (cache_hit)
+	// Determine cache line to be modified depending on whether the address was found or not.
+	if (*hit)
 	{
 		cache_dec_associative(cache_hit_line); /* Sets hit as maximum usage. Decrements cache usage. */
 	}
@@ -129,18 +145,18 @@ int cache_search_associative(unsigned short address)
 // The CPU's MAR specifies the address that we are to search for.
 void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 {
-	int idx;		  /* Index of the cache line containing the targeted address. Assumed that it will be initialized. */
-	bool hit = false; /* Bool indicating if the targeted address was found in cache. Assumed false. */
+	int idx = CACHE_SIZE; /* Index of the cache line containing the targeted address. Assumed that it will be initialized. */
+	bool hit = false;	  /* Bool indicating if the targeted address was found in cache. Assumed false. */
 
 	// Determine the cache organization method that will be used.
-	switch (DIRECT)
+	switch (organization_method)
 	{
 	case DIRECT:
 		idx = cache_search_direct(&hit);
 		break;
 
 	case ASSOCIATIVE:
-		idx = cache_search_associative(mar);
+		idx = cache_search_associative(mar, &hit);
 		break;
 
 	case N_WAY:
@@ -169,7 +185,7 @@ void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 		break;
 
 	case WRITE:
-		switch (WRITE_BACK)
+		switch (replacement_policy)
 		{
 		case WRITE_BACK:
 			if (hit)
