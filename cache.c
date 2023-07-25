@@ -141,6 +141,79 @@ int cache_search_associative(unsigned short address, bool* hit)
 	return cache_hit_line;
 }
 
+// Reads cache data from the provided cache index.
+// Replaces address and data in the targeted cache line if a miss has been specified.
+void cache_read(int idx, bool hit)
+{
+	if (hit)
+	{
+		#ifdef VERBOSE
+		printf("[CACHE] Read hit detected.\n");
+		#endif
+		cpu.mbr = cache[idx].data;
+	}
+	else /* Miss. Have to fetch data from main memory. */
+	{
+		if (cache[idx].dirty)
+		{
+			// Should use bus function!
+			mem.word[cache[idx].address] = cache[idx].data; /* Contents of evicted cache line are written to main memory. */
+		}
+		bus(cpu.mar, cpu.mbr, READ, WORD);
+		cache[idx].address = cpu.mar;
+		cache[idx].data = cpu.mbr;
+		cache[idx].dirty = false;
+	}
+}
+
+// Writes cache data to the provided cache index.
+// Replaces address and data in the targeted cache line if a miss has been specified.
+// Can use write-back or write-through replacement policies (defaults to write-back).
+void cache_write(int idx, bool hit)
+{
+	switch (replacement_policy)
+	{
+	case WRITE_BACK:
+		if (hit)
+		{
+			#ifdef VERBOSE
+			printf("[CACHE] Write hit detected (write-back).\n");
+			#endif
+			cache[idx].data = cpu.mbr;
+			cache[idx].dirty = true;
+		}
+		else /* Miss. May have to write contents of evicted cache line to main memory. */
+		{
+			if (cache[idx].dirty)
+			{
+				// Should use bus function!
+				mem.word[cache[idx].address] = cache[idx].data; /* Contents of evicted cache line are written to main memory. */
+			}
+			cache[idx].address = cpu.mar;
+			cache[idx].data = cpu.mbr;
+			cache[idx].dirty = true;
+		}
+		break;
+
+	case WRITE_THROUGH:
+		if (hit)
+		{
+			#ifdef VERBOSE
+			printf("[CACHE] Write hit detected (write-through).\n");
+			#endif
+			cache[idx].data = cpu.mbr;
+			mem.word[cpu.mar] = cpu.mbr; /* Should use bus! */
+		}
+		else /* Miss. */
+		{
+			cache[idx].address = cpu.mar;
+			cache[idx].data = cpu.mbr;
+			mem.word[cpu.mar] = cpu.mbr; /* Should use bus! */
+		}
+		break;
+	}
+}
+
 // Searches the cache.
 // Can utilize a varity of cache organization methods based on the user input.
 // The CPU's MAR specifies the address that we are to search for.
@@ -169,70 +242,11 @@ void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 	switch (rw)
 	{
 	case READ:
-		if (hit)
-		{
-			#ifdef VERBOSE
-			printf("[CACHE] Read hit detected.\n");
-			#endif
-			*mbr = cache[idx].data;
-		}
-		else /* Miss. Have to fetch data from main memory. */
-		{
-			if (cache[idx].dirty)
-			{
-				// Should use bus function!
-				mem.word[cache[idx].address] = cache[idx].data; /* Contents of evicted cache line are written to main memory. */
-			}
-			bus(mar, mbr, READ, WORD);
-			cache[idx].address = mar;
-			cache[idx].data = *mbr;
-			cache[idx].dirty = false;
-		}
+		cache_read(idx, hit);
 		break;
 
 	case WRITE:
-		switch (replacement_policy)
-		{
-		case WRITE_BACK:
-			if (hit)
-			{
-				#ifdef VERBOSE
-				printf("[CACHE] Write hit detected (write-back).\n");
-				#endif
-				cache[idx].data = *mbr;
-				cache[idx].dirty = true;
-			}
-			else /* Miss. May have to write contents of evicted cache line to main memory. */
-			{
-				if (cache[idx].dirty)
-				{
-					// Should use bus function!
-					mem.word[cache[idx].address] = cache[idx].data; /* Contents of evicted cache line are written to main memory. */
-				}
-				cache[idx].address = mar;
-				cache[idx].data = *mbr;
-				cache[idx].dirty = true;
-			}
-			break;
-
-		case WRITE_THROUGH:
-			if (hit)
-			{
-				#ifdef VERBOSE
-				printf("[CACHE] Write hit detected (write-through).\n");
-				#endif
-				cache[idx].data = *mbr;
-				mem.word[mar] = *mbr; /* Should use bus! */
-			}
-			else /* Miss. */
-			{
-				cache[idx].address = mar;
-				cache[idx].data = *mbr;
-				mem.word[mar] = *mbr; /* Should use bus! */
-			}
-			break;
-		}
-
+		cache_write(idx, hit);
 		break;
 	}
 }
