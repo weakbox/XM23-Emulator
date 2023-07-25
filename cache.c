@@ -142,7 +142,7 @@ int cache_search_associative(unsigned short target_address, bool* hit)
 
 // Reads cache data from the provided cache index.
 // Replaces address and data in the targeted cache line if a miss has been specified.
-void cache_read(int idx, bool hit)
+void cache_read(unsigned short target_address, int idx, bool hit)
 {
 	if (hit)
 	{
@@ -155,10 +155,16 @@ void cache_read(int idx, bool hit)
 	{
 		if (cache[idx].dirty)
 		{
-			// Should use bus function!
-			mem.word[cache[idx].address] = cache[idx].data; /* Contents of evicted cache line are written to main memory. */
+			// Write contents of cache line to main memory.
+			cpu.mar = cache[idx].address;
+			cpu.mbr = cache[idx].data;
+			bus(cpu.mar, &cpu.mbr, WRITE, WORD);
 		}
-		bus(cpu.mar, cpu.mbr, READ, WORD);
+		// Read contents of memory address from main memory.
+		cpu.mar = target_address;
+		bus(cpu.mar, &cpu.mbr, READ, WORD);
+
+		// Store contents of memory address into cache line.
 		cache[idx].address = cpu.mar;
 		cache[idx].data = cpu.mbr;
 		cache[idx].dirty = false;
@@ -168,7 +174,7 @@ void cache_read(int idx, bool hit)
 // Writes cache data to the provided cache index.
 // Replaces address and data in the targeted cache line if a miss has been specified.
 // Can use write-back or write-through replacement policies (defaults to write-back).
-void cache_write(int idx, bool hit)
+void cache_write(unsigned short target_address, unsigned short target_buffer, int idx, bool hit)
 {
 	// Policy determines how main memory will be updated when a write occurs.
 	switch (replacement_policy)
@@ -184,9 +190,14 @@ void cache_write(int idx, bool hit)
 		{
 			if (cache[idx].dirty)
 			{
-				// This should use the CPU bus!!!
-				mem.word[cache[idx].address] = cache[idx].data;
+				// Write contents of cache line to main memory.
+				cpu.mar = cache[idx].address;
+				cpu.mbr = cache[idx].data;
+				bus(cpu.mar, &cpu.mbr, WRITE, WORD);
 			}
+			// Return target address and buffer to the CPU.
+			cpu.mar = target_address;
+			cpu.mbr = target_buffer;
 		}
 		// A write using the write-back policy always results in the dirty bit being set.
 		cache[idx].dirty = true;
@@ -196,12 +207,11 @@ void cache_write(int idx, bool hit)
 		if (hit)
 		{
 			#ifdef VERBOSE
-			printf("[CACHE] Write hit!.\n");
+			printf("[CACHE] Write hit!\n");
 			#endif			
 		}
 		// A write using the write-through policy always results in the data being written to main memory.
-		// This should use the CPU bus!!!
-		mem.word[cpu.mar] = cpu.mbr;
+		bus(cpu.mar, &cpu.mbr, WRITE, WORD);
 		break;
 	}
 	// Regardless of policy, the cache line specified by the index is always written to.
@@ -215,6 +225,7 @@ void cache_write(int idx, bool hit)
 void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 {
 	unsigned short target_address = mar; /* Address to be searched for in cache. */
+	unsigned short target_buffer = *mbr; /* Buffer. Only used during a write operation. */
 
 	int idx = 0;	  /* Index of the cache line containing the targeted address. Assumed that it will be initialized elsewhere. */
 	bool hit = false; /* Flag indicating if the targeted address was found in cache. Assumed false. */
@@ -238,11 +249,11 @@ void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 	switch (rw)
 	{
 	case READ:
-		cache_read(idx, hit);
+		cache_read(target_address, idx, hit);
 		break;
 
 	case WRITE:
-		cache_write(idx, hit);
+		cache_write(target_address, target_buffer, idx, hit);
 		break;
 	}
 }

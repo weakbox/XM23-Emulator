@@ -148,7 +148,19 @@ extern void				print_controls();
 extern unsigned short	combine_bytes(unsigned short msb, unsigned short lsb);
 
 // Functions defined in "cache.c"
+
+// Initializes the contents of each cache line to zero.
+// Assumes initialization was successful.
 extern void cache_init(int cache_size);
+
+// Prints the contents of each cache line.
 extern void cache_print(int cache_size);
+
+// Allows the user to modify the cache organization method and the cache replacement policy settings.
+// Will reinitialize the cache if these settings have been modified.
 extern void cache_config(int org, int pol);
+
+// Searches the cache.
+// Can utilize a varity of cache organization methods based on the user input.
+// The CPU's MAR specifies the address that we are to search for.
 extern void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb);
