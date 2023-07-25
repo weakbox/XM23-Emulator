@@ -54,7 +54,8 @@ void cache_print()
 int cache_search_direct(bool* found)
 {
 	// Determine the key (index). Value is a range from 0 to CACHE_SIZE - 1.
-	int i = cpu.mar % CACHE_SIZE;
+	// MAR must be halved as MAR will always be an even number.
+	int i = (cpu.mar/2) % CACHE_SIZE;
 
 	if (cache[i].address == cpu.mar)
 	{
@@ -153,13 +154,16 @@ void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 	case READ:
 		if (hit)
 		{
-			mbr = cache[idx].data;
+			#ifdef VERBOSE
+			printf("[CACHE] Hit detected.\n");
+			#endif
+			*mbr = cache[idx].data;
 		}
 		else /* Miss. Have to fetch data from main memory. */
 		{
 			bus(mar, mbr, READ, WORD);
 			cache[idx].address = mar;
-			cache[idx].data = mbr;
+			cache[idx].data = *mbr;
 			cache[idx].dirty = false;
 		}
 		break;
@@ -170,17 +174,18 @@ void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 		case WRITE_BACK:
 			if (hit)
 			{
-				cache[idx].data = mbr;
+				cache[idx].data = *mbr;
 				cache[idx].dirty = true;
 			}
 			else /* Miss. May have to write contents of evicted cache line to main memory. */
 			{
 				if (cache[idx].dirty)
 				{
+					// Should use bus function!
 					mem.word[cache[idx].address] = cache[idx].data; /* Contents of evicted cache line are written to main memory. */
 				}
 				cache[idx].address = mar;
-				cache[idx].data = mbr;
+				cache[idx].data = *mbr;
 				cache[idx].dirty = true;
 			}
 			break;
@@ -188,14 +193,14 @@ void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 		case WRITE_THROUGH:
 			if (hit)
 			{
-				cache[idx].data = mbr;
-				mem.word[mar] = mbr;
+				cache[idx].data = *mbr;
+				mem.word[mar] = *mbr;
 			}
 			else /* Miss. */
 			{
 				cache[idx].address = mar;
-				cache[idx].data = mbr;
-				mem.word[mar] = mbr;
+				cache[idx].data = *mbr;
+				mem.word[mar] = *mbr;
 			}
 			break;
 		}
