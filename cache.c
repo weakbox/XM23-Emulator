@@ -7,6 +7,8 @@
 
 #include "header.h"
 
+#define LSBYTE(x) ((x) & 0xFF)
+
 enum organization { DIRECT, ASSOCIATIVE, N_WAY };
 enum replacement_policy { WRITE_BACK, WRITE_THROUGH };
 
@@ -149,7 +151,7 @@ void cache_read(unsigned short target_address, int wb, int idx, bool hit)
 		#ifdef VERBOSE
 		printf("[CACHE] Read hit!\n");
 		#endif
-		cpu.mbr = cache[idx].data;
+		cpu.mbr = (wb == WORD) ? cache[idx].data : LSBYTE(cache[idx].data);
 	}
 	else /* Miss. Have to fetch data from main memory. */
 	{
@@ -216,7 +218,7 @@ void cache_write(unsigned short target_address, unsigned short target_data, int 
 	}
 	// Regardless of policy, the cache line specified by the index is always written to.
 	cache[idx].address = cpu.mar;
-	cache[idx].data = cpu.mbr;
+	cache[idx].data = (wb == WORD) ? cpu.mbr : LSBYTE(cpu.mbr);
 }
 
 // Searches the cache.
@@ -231,6 +233,7 @@ void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 	bool hit = false; /* Flag indicating if the targeted address was found in cache. Assumed false. */
 
 	// Determine the cache organization method that will be used.
+	// Assume that a valid organization method was chosen.
 	switch (organization_method)
 	{
 	case DIRECT:
