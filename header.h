@@ -12,7 +12,7 @@
 #include <string.h>
 #include <signal.h>
 
-#define VERBOSE	// Can be enabled to show visual indications of events within the emulator.
+// #define VERBOSE	// Can be enabled to show visual indications of events within the emulator.
 
 #define NEWLINE '\n'
 #define NUL '\0'

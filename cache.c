@@ -53,7 +53,7 @@ void cache_print(int cache_size)
 // Will reinitialize the cache if these settings have been modified.
 void cache_config(int org, int pol)
 {
-	if (org != organization_method || pol != replacement_policy) /* Cache organization method and/or replacement policy have changed. */
+	if ((org != organization_method || pol != replacement_policy) && ((org >= 0 && org <= 1) && (pol >= 0 && pol <= 1))) /* Cache organization method and/or replacement policy have changed. */
 	{
 		printf("Cache settings were modified.\n");
 		cache_init(CACHE_SIZE);    /* Re-initialize the cache to avoid errors. */

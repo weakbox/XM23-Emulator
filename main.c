@@ -120,6 +120,13 @@ int main(int argv, char* argc[])
 
 			case 9:
 				printf("Enter new cache settings: <org> <pol>\n");
+				printf("Cache Organizations:\n");
+				printf("\t0: Direct mapping\n");
+				printf("\t1: Associative\n");
+				printf("Cache Policies:\n");
+				printf("\t0: Write-back\n");
+				printf("\t1: Write-through\n");
+
 				printf("Input: ");
 				(void)scanf("%i %i", &input_mod1, &input_mod2);
 				flush_buffer();
