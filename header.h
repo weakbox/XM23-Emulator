@@ -12,7 +12,7 @@
 #include <string.h>
 #include <signal.h>
 
-#define VERBOSE	// Can be enabled to show instructions as they enter the IR.
+#define VERBOSE	// Can be enabled to show visual indications of events within the emulator.
 
 #define NEWLINE '\n'
 #define NUL '\0'
@@ -131,6 +131,7 @@ extern unsigned short	swap_byte(unsigned short dest);
 extern unsigned short	sign_extend(unsigned short dest);
 extern void				psw_mod(unsigned short psw_bits, bool clear);
 extern void				exec_conditional(unsigned short f_count, unsigned short t_count, unsigned short code);
+extern bool				cex_blocking();
 extern void				load(unsigned short* dest, unsigned short* source, unsigned short prpo, unsigned short dec, unsigned short inc, unsigned short wb);
 extern void				store(unsigned short* dest, unsigned short source, unsigned short prpo, unsigned short dec, unsigned short inc, unsigned short wb);
 extern unsigned short	move(unsigned short dest, unsigned short source, unsigned short wb);

@@ -522,6 +522,29 @@ void exec_conditional(unsigned short f_count, unsigned short t_count, unsigned s
 	}
 }
 
+// Checks if an instruction is blocked by a CEX instruction.
+// Returns true if blocked, false if unblocked.
+bool cex_blocking()
+{
+	// Execute only occurs if it is not blocked by a CEX instruction.
+	if (cex.true_count <= 0 && cex.false_count > 0)
+	{
+		#ifdef VERBOSE
+			printf("[CEX] CEX Block!\n");
+		#endif
+		cex.false_count--;
+		return true;
+	}
+	else
+	{
+		if (cex.true_count > 0)
+		{
+			cex.true_count--;
+		}
+		return false;
+	}
+}
+
 // Loads memory from the address specified by the source register into the destination register.
 // Can decrement/increment the destination register to allow for indexed addressing. 
 void load(unsigned short* dest, unsigned short* source, unsigned short prpo, unsigned short dec, unsigned short inc, unsigned short wb)

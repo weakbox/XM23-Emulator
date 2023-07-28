@@ -358,289 +358,309 @@ int decode(unsigned short ir)
 // Executes the instruction stored in the instruction register.
 void execute(unsigned short ir, unsigned short pc)
 {
-#ifdef VERBOSE
-    printf("IR: %04x ", cpu.ir);
-#endif
-    switch (decode(cpu.ir))
+    #ifdef VERBOSE
+        printf("IR: %04x ", cpu.ir);
+    #endif
+
+    int inst_code = decode(cpu.ir);
+
+    // Check if instruction in IR is a branching instruction.
+    // CEX is disabled when a branching instruction is called.
+    if (inst_code >= BL && inst_code <= BRA)
+    {
+        // Branching instruction was called, disable CEX:
+        cex.true_count = 0;
+        cex.false_count = 0;
+    }
+    // Check if a CEX instruction is blocking the execution of instructions:
+    // Early return without executing if CEX is blocking.
+    if (cex_blocking())
+    {
+        return;
+    }
+
+    // Instruction is not being blocked.
+    // Execute the instruction based on the instruction code.
+    switch (inst_code)
     {
     case BL: // Branch unconditionally. Store return address in link register.
-#ifdef VERBOSE
-        printf("(BL)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(BL)\n");
+        #endif
         branch_link(OFFSET_BRANCH_LINK(cpu.ir));
         break;
 
     case BEQBZ: // Branch if PSW's zero bit is set.
-#ifdef VERBOSE
-        printf("(BEQBZ)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(BEQBZ)\n");
+        #endif
         branch_conditional(psw.zero, 1, OFFSET_BRANCH_COND(cpu.ir));
         break;
 
     case BNEBNZ: // Branch if PSW's zero bit is cleared.
-#ifdef VERBOSE
-        printf("(BNEBZ)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(BNEBZ)\n");
+        #endif
         branch_conditional(psw.zero, 0, OFFSET_BRANCH_COND(cpu.ir));
         break;
 
     case BCBHS: // Branch if PSW's carry bit is set.
-#ifdef VERBOSE
-        printf("(BCBHS)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(BCBHS)\n");
+        #endif
         branch_conditional(psw.carry, 1, OFFSET_BRANCH_COND(cpu.ir));
         break;
 
     case BNCBLO: // Branch if PSW's carry bit is cleared.
-#ifdef VERBOSE
-        printf("(BNCBLO)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(BNCBLO)\n");
+        #endif
         branch_conditional(psw.carry, 0, OFFSET_BRANCH_COND(cpu.ir));
         break;
 
     case BN: // Branch if PSW's negative bit is set.
-#ifdef VERBOSE
-        printf("(BN)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(BN)\n");
+        #endif
         branch_conditional(psw.negative, 1, OFFSET_BRANCH_COND(cpu.ir));
         break;
 
     case BGE: // Branch if PSW's negative and overflow bit is cleared.
-#ifdef VERBOSE
-        printf("(BGE)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(BGE)\n");
+        #endif
         branch_conditional((psw.negative || psw.overflow), 0, OFFSET_BRANCH_COND(cpu.ir));
         break;
 
     case BLT: // Branch if PSW's negative or overflow bit is set.
-#ifdef VERBOSE
-        printf("(BLT)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(BLT)\n");
+        #endif
         branch_conditional((psw.negative || psw.overflow), 1, OFFSET_BRANCH_COND(cpu.ir));
         break;
 
     case BRA: // Branch unconditionally.
-#ifdef VERBOSE
-        printf("(BRA)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(BRA)\n");
+        #endif
         branch_conditional(1, 1, OFFSET_BRANCH_COND(cpu.ir));
         break;
 
     case ADD: // Add source to destination.
-#ifdef VERBOSE
-        printf("(ADD)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(ADD)\n");
+        #endif
         regfile[0][DEST(cpu.ir)] = add(regfile[0][DEST(cpu.ir)], regfile[RC(cpu.ir)][SOURCE(cpu.ir)], 0, WB(cpu.ir));
         break;
 
     case ADDC: // Add source + carry to destination.
-#ifdef VERBOSE
-        printf("(ADDC)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(ADDC)\n");
+        #endif
         regfile[0][DEST(cpu.ir)] = add(regfile[0][DEST(cpu.ir)], regfile[RC(cpu.ir)][SOURCE(cpu.ir)], psw.carry, WB(cpu.ir));
         break;
 
     case SUB: // Subtract source from destination (uses two's complement subtraction).
-#ifdef VERBOSE
-        printf("(SUB)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(SUB)\n");
+        #endif
         regfile[0][DEST(cpu.ir)] = add(regfile[0][DEST(cpu.ir)], ((~regfile[RC(cpu.ir)][SOURCE(cpu.ir)]) + 1), 0, WB(cpu.ir));
         break;
 
     case SUBC: // Subtract source + carry from destination (uses two's complement subtraction).
-#ifdef VERBOSE
-        printf("(SUBC)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(SUBC)\n");
+        #endif
         regfile[0][DEST(cpu.ir)] = add(regfile[0][DEST(cpu.ir)], (~regfile[RC(cpu.ir)][SOURCE(cpu.ir)]), psw.carry, WB(cpu.ir));
         break;
 
     case DADD: // Decimal add BCD numbers source + destination.
-#ifdef VERBOSE
-        printf("(DADD)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(DADD)\n");
+        #endif
         regfile[0][DEST(cpu.ir)] = add_decimal(regfile[0][DEST(cpu.ir)], regfile[RC(cpu.ir)][SOURCE(cpu.ir)], WB(cpu.ir));
         break;
 
     case CMP: // Compare source with destination.
-#ifdef VERBOSE
-        printf("(CMP)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(CMP)\n");
+        #endif
         compare(regfile[0][DEST(cpu.ir)], regfile[RC(cpu.ir)][SOURCE(cpu.ir)], WB(cpu.ir));
         break;
 
     case XOR: // XOR's source with destination.
-#ifdef VERBOSE
-        printf("(XOR)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(XOR)\n");
+        #endif
         regfile[0][DEST(cpu.ir)] = xor (regfile[0][DEST(cpu.ir)], regfile[RC(cpu.ir)][SOURCE(cpu.ir)], WB(cpu.ir));
         break;
 
     case AND: // AND's source with destination.
-#ifdef VERBOSE
-        printf("(AND)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(AND)\n");
+        #endif
         regfile[0][DEST(cpu.ir)] = and (regfile[0][DEST(cpu.ir)], regfile[RC(cpu.ir)][SOURCE(cpu.ir)], WB(cpu.ir));
         break;
 
     case OR: // OR's source with destination.
-#ifdef VERBOSE
-        printf("(OR)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(OR)\n");
+        #endif
         regfile[0][DEST(cpu.ir)] = or (regfile[0][DEST(cpu.ir)], regfile[RC(cpu.ir)][SOURCE(cpu.ir)], WB(cpu.ir));
         break;
 
     case BIT: // Test if bit set in source is set in destination.
-#ifdef VERBOSE
-        printf("(BIT)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(BIT)\n");
+        #endif
         compare_bit(regfile[0][DEST(cpu.ir)], regfile[RC(cpu.ir)][SOURCE(cpu.ir)], WB(cpu.ir));
         break;
 
     case BIC: // Clear bit in destination specified by source.
-#ifdef VERBOSE
-        printf("(BIC)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(BIC)\n");
+        #endif
         regfile[0][DEST(cpu.ir)] = clear_bit(regfile[0][DEST(cpu.ir)], regfile[RC(cpu.ir)][SOURCE(cpu.ir)], WB(cpu.ir));
         break;
 
     case BIS: // Set bit in destination specified by source.
-#ifdef VERBOSE
-        printf("(BIS)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(BIS)\n");
+        #endif
         regfile[0][DEST(cpu.ir)] = set_bit(regfile[0][DEST(cpu.ir)], regfile[RC(cpu.ir)][SOURCE(cpu.ir)], WB(cpu.ir));
         break;
 
     case MOV: // Copies source into destination.
-#ifdef VERBOSE
-        printf("(MOV)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(MOV)\n");
+        #endif
         regfile[0][DEST(cpu.ir)] = move(regfile[0][DEST(cpu.ir)], regfile[0][SOURCE(cpu.ir)], WB(cpu.ir));
         break;
 
     case SWAP: // Swaps source and destination registers.
-#ifdef VERBOSE
-        printf("(SWAP)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(SWAP)\n");
+        #endif
         swap_reg(&regfile[0][DEST(cpu.ir)], &regfile[0][SOURCE(cpu.ir)]);
         break;
 
     case SRA: // Shifts destniation right by 1 bit.
-#ifdef VERBOSE
-        printf("(SRA)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(SRA)\n");
+        #endif
         regfile[0][DEST(cpu.ir)] = shift(regfile[0][DEST(cpu.ir)], WB(ir));
         break;
 
     case RRC: // Shifts destniation right by 1 bit. Stores exchanges contents of LSB and PSW's C bit.
-#ifdef VERBOSE
-        printf("(RRC)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(RRC)\n");
+        #endif
         regfile[0][DEST(cpu.ir)] = rotate(regfile[0][DEST(cpu.ir)], WB(ir));
         break;
 
     case COMP: // One's complements destination.
-#ifdef VERBOSE
-        printf("(COMP)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(COMP)\n");
+        #endif
         regfile[0][DEST(cpu.ir)] = complement(regfile[0][DEST(cpu.ir)], WB(cpu.ir));
         break;
 
     case SWPB: // Swaps the most and least significant bytes in the destination.
-#ifdef VERBOSE
-        printf("(SWPB)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(SWPB)\n");
+        #endif
         regfile[0][DEST(cpu.ir)] = swap_byte(regfile[0][DEST(cpu.ir)]);
         break;
 
     case SXT: // Sign extends destination.
-#ifdef VERBOSE
-        printf("(SXT)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(SXT)\n");
+        #endif
         regfile[0][DEST(cpu.ir)] = sign_extend(regfile[0][DEST(cpu.ir)]);
         break;
 
     case SETCC: // Sets PSW bits.
         #ifdef VERBOSE
-        printf("(SETCC)\n");
+            printf("(SETCC)\n");
         #endif
         psw_mod(PSW_BITS(cpu.ir), false);
         break;
 
     case CLRCC: // Clears PSW bits.
         #ifdef VERBOSE
-        printf("(CLRCC)\n");
+            printf("(CLRCC)\n");
         #endif
         psw_mod(PSW_BITS(cpu.ir), true);
         break;
 
     case CEX: // Determines conditional execution.
         #ifdef VERBOSE
-        printf("(CEX)\n");
+            printf("(CEX)\n");
         #endif
         exec_conditional(FALSE(ir), TRUE(ir), CODE(ir));
         break;
 
     case LD: // Loads data from memory into the destination register at an address specified by the source register.
-#ifdef VERBOSE
-        printf("(LD)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(LD)\n");
+        #endif
         load(&regfile[0][DEST(cpu.ir)], &regfile[0][SOURCE(cpu.ir)], PRPO(cpu.ir), DEC(cpu.ir), INC(cpu.ir), WB(cpu.ir));
         break;
 
     case ST: // Stores value of the source register into memory at an address specified by the destination register.
-#ifdef VERBOSE
-        printf("(ST)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(ST)\n");
+        #endif
         store(&regfile[0][DEST(cpu.ir)], regfile[0][SOURCE(cpu.ir)], PRPO(cpu.ir), DEC(cpu.ir), INC(cpu.ir), WB(cpu.ir));
         break;
 
     case MOVL: // Moves a byte into the LSByte of the destination. Does not modify the MSByte.
-#ifdef VERBOSE
-        printf("(MOVL)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(MOVL)\n");
+        #endif
         move_bytes(&regfile[0][DEST(cpu.ir)], MSBYTE(regfile[0][DEST(cpu.ir)]), BYTE_MOV(cpu.ir));
         break;
 
     case MOVLZ: // Moves a byte into the LSByte of the destination. The MSByte is zeroed.
-#ifdef VERBOSE
-        printf("(MOVLZ)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(MOVLZ)\n");
+        #endif
         move_bytes(&regfile[0][DEST(cpu.ir)], 0x00, BYTE_MOV(cpu.ir));
         break;
 
     case MOVLS: // Moves a byte into the LSByte of the destination. The MSByte is assigned 0xFF.
-#ifdef VERBOSE
-        printf("(MOVLS)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(MOVLS)\n");
+        #endif
         move_bytes(&regfile[0][DEST(cpu.ir)], 0xFF, BYTE_MOV(cpu.ir));
         break;
 
     case MOVH: // Moves a byte into the MSByte of the destination. Does not modify the LSByte.
-#ifdef VERBOSE
-        printf("(MOVH)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(MOVH)\n");
+        #endif
         move_bytes(&regfile[0][DEST(cpu.ir)], BYTE_MOV(cpu.ir), LSBYTE(regfile[0][DEST(cpu.ir)]));
         break;
 
     case LDR: // Loads data from memory into the destination register at an address specified by the source register, relative to a specified offset.
-#ifdef VERBOSE
-        printf("(LDR)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(LDR)\n");
+        #endif
         load_rel(&regfile[0][DEST(cpu.ir)], regfile[0][SOURCE(cpu.ir)], OFFSET_LOAD_STORE_REL(cpu.ir), WB(cpu.ir));
         break;
 
     case STR: // Stores value of the source register into memory at an address specified by the destination register, relative to a specified offset.
-#ifdef VERBOSE
-        printf("(STR)\n");
-#endif
+        #ifdef VERBOSE
+            printf("(STR)\n");
+        #endif
         store_rel(regfile[0][DEST(cpu.ir)], regfile[0][SOURCE(cpu.ir)], OFFSET_LOAD_STORE_REL(cpu.ir), WB(cpu.ir));
         break;
 
     default: // Somehow there was an invalid instruction present in the instruction register.
-#ifdef VERBOSE
-        printf("\n");
-        printf("Instruction not found!\n");
-#endif
+        #ifdef VERBOSE
+            printf("\n");
+            printf("Instruction not found!\n");
+        #endif
         break;
     }
     cpu.clock++;

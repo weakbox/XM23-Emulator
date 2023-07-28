@@ -20,29 +20,6 @@ unsigned short regfile[2][8] =
 
 volatile sig_atomic_t ctrl_c_fnd;
 
-// Checks if an instruction is blocked by a CEX instruction.
-// Returns 1 if unblocked, 0 if blocked.
-bool cex_not_blocked()
-{
-	// Execute only occurs if it is not blocked by a CEX instruction.
-	if (cex.true_count <= 0 && cex.false_count > 0)
-	{
-		#ifdef VERBOSE
-		printf("CEX Block!\n");
-		#endif
-		cex.false_count--;
-		return false;
-	}
-	else
-	{
-		if (cex.true_count > 0)
-		{
-			cex.true_count--;
-		}
-		return true;
-	}
-}
-
 // Please note that the code is heavily commented for ease of marking.
 int main(int argv, char* argc[])
 {
@@ -96,20 +73,13 @@ int main(int argv, char* argc[])
 				while (PC != breakpoint && !ctrl_c_fnd)
 				{
 					fetch();
-					if (cex_not_blocked())
-					{
-						execute(cpu.ir, PC);
-					}
+					execute(cpu.ir, PC);
 				}
-
 				break;
 
 			case 2: // Step through program.
 				fetch();
-				if (cex_not_blocked())
-				{
-					execute(cpu.ir, PC);
-				}
+				execute(cpu.ir, PC);
 				break;
 
 			case 3: // Set breakpoint.
