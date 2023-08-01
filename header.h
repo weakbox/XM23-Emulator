@@ -12,7 +12,7 @@
 #include <string.h>
 #include <signal.h>
 
-// #define VERBOSE	// Can be enabled to show visual indications of events within the emulator.
+#define VERBOSE	// Can be enabled to show visual indications of events within the emulator.
 
 #define NEWLINE '\n'
 #define NUL '\0'
@@ -165,3 +165,7 @@ extern void cache_config(int org, int pol);
 // Can utilize a varity of cache organization methods based on the user input.
 // The CPU's MAR specifies the address that we are to search for.
 extern void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb);
+
+extern void i_vector_init();
+
+extern void i_vector_print();

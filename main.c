@@ -41,6 +41,10 @@ int main(int argv, char* argc[])
 	// Initialize the CPU's internal registers.
 	initialize_cpu(&cpu);
 	cache_init(CACHE_SIZE);
+	i_vector_init();
+	#ifdef VERBOSE
+		i_vector_print();
+	#endif
 
 	// Initialize local variables for user input.
 	bool running   = true;
