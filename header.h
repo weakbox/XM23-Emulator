@@ -169,3 +169,7 @@ extern void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb);
 extern void i_vector_init();
 
 extern void i_vector_print();
+
+extern void set_priority(int new_pri);
+
+extern void supervisory_call(int vector_index);

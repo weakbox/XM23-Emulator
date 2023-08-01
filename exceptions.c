@@ -103,20 +103,28 @@ PSW psw_decode(unsigned short psw_unsigned)
 	return converted_psw;
 }
 
+// Sets CPU priority in PSW.
+// Throws a priority fault if trying to set to a higher priority.
 void set_priority(int new_pri)
 {
-
+	if (new_pri > psw.current)
+	{
+		// Throw priority fault.
+	}
+	psw.previous = psw.current;
+	psw.current = new_pri;
 }
 
 // Pushes current CPU state onto stack, then sets CPU state stored in the interrupt vector.
 // Modifies PC to the address of the interrupt handler.
 // Throws a priority fault if the SVC was called by a process with a higher priority than the interrupt handler.
-void supervisory_call(int i_vec)
+void supervisory_call(int vector_index)
 {
 	// Push current CPU state:
 	stack_push(PC, LR, psw, cex);
 
 	// Get new CPU state from interrupt vector:
-	psw = psw_decode(i_vec_table[i_vec].psw);
-	PC = i_vec_table[i_vec].address;
+	psw = psw_decode(i_vec_table[vector_index].psw);
+	PC = i_vec_table[vector_index].address;
+	LR = 0xFFFF; /* Link register is set to -1 to indicate to MOV instruction that we must pull the new link register off the stack. */
 }

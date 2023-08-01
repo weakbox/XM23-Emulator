@@ -60,6 +60,7 @@
 #define BITS_9_TO_7(x)		((x >> 7)  & 0x07)
 #define BITS_6_AND_5(x)		((x >> 5)  & 0x03)
 #define BITS_5_TO_3(x)		((x >> 3)  & 0x07)
+#define BIT_4(x)			((x >> 4)  & 0x01)
 
 // Isolates specific bits present in the instruction register.
 // These definitions allow the emulator to extract parameters from the instruction register.
@@ -78,6 +79,8 @@
 #define FALSE(x)					((x)       & 0x07)
 #define TRUE(x)					    ((x >> 3)  & 0x07)
 #define CODE(x)						((x >> 6)  & 0x0F)
+#define PRIORITY(x)					((x)       & 0x07)
+#define INTERRUPT_VECTOR(x)			((x)       & 0x0F)
 #define LSBYTE(x)					((x)       & 0xFF)
 #define MSBYTE(x)					((x >> 8)  & 0xFF)
 #define MSBIT_WORD(x)				((x >> 15) & 0x01)

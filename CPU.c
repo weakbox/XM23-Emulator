@@ -287,11 +287,15 @@ int decode(unsigned short ir)
                     switch (BITS_6_AND_5(cpu.ir))
                     {
                     case 0:
-                        inst = SETPRI;
-                        break;
-
-                    case 1:
-                        inst = SETCC; // Was SVC.
+                        switch (BIT_4(cpu.ir))
+                        {
+                        case 0:
+                            inst = SETPRI;
+                            break;
+                        case 1:
+                            inst = SVC;
+                            break;
+                        }
                         break;
 
                     case 2:
@@ -577,6 +581,20 @@ void execute(unsigned short ir, unsigned short pc)
             printf("(SXT)\n");
         #endif
         regfile[0][DEST(cpu.ir)] = sign_extend(regfile[0][DEST(cpu.ir)]);
+        break;
+    
+    case SETPRI: // Sets priority.
+        #ifdef VERBOSE
+            printf("(SETPRI)\n");
+        #endif
+            set_priority(PRIORITY(cpu.ir));
+        break;
+
+    case SVC: // Performs a supervisory call (traps).
+        #ifdef VERBOSE
+            printf("(SVC)\n");
+        #endif
+        supervisory_call(INTERRUPT_VECTOR(cpu.ir));
         break;
 
     case SETCC: // Sets PSW bits.
