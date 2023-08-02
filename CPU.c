@@ -65,6 +65,8 @@ void print_psw()
 	printf("Negative: %i\n", psw.negative);
     printf("Sleep:    %i\n", psw.sleep);
 	printf("Overflow: %i\n", psw.overflow);
+    printf("Cur Pri:  %i\n", psw.current);
+    printf("Prev Pri: %i\n", psw.previous);
 }
 
 // Prints the contents of the register file.

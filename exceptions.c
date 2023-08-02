@@ -7,7 +7,7 @@
 
 #include "header.h"
 
-// Isolates specific bits in the PSW.
+// Macro definitions to isolate specific bits in the PSW.
 #define CARRY(x)	((x) & 0x01)
 #define ZERO(x)		((x >> 01) & 0x01)
 #define NEGATIVE(x)	((x >> 02) & 0x01)
@@ -67,6 +67,7 @@ void stack_pull(unsigned short* pc, unsigned short* lr, PSW* psw, CEX* cex)
 
 // Initialize the interrupt vector table.
 // System assumes this table will not be changed during execution.
+// Will lead to problems if the interrupt vector table is modified at runtime.
 void i_vector_init()
 {
 	for (int i = 0; i < I_VEC_SIZE; i++)
@@ -128,7 +129,9 @@ void supervisory_call(int vector_index)
 	}
 }
 
-// Wrapper for the Supervisory Call function.
+// Calls the appropriate fault handler for the fault specified.
+// Checks if a double fault has occured.
+// Can print faults to console if VERBOSE flag is defined.
 void fault(int fault_id)
 {
 	// If the PSW is already in a faulting state when the fault is called, a double fault occurs.
