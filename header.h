@@ -32,6 +32,11 @@
 #define SP regfile[0][6]	// R6 -> Stack Pointer
 #define PC regfile[0][7]	// R7 -> Program Counter
 
+#define FAULT_ILL_INST 8
+#define FAULT_INV_ADDR 9
+#define FAULT_PRI 10
+#define FAULT_DBL 11
+
 // Stores data relevent to the operation of the CPU.
 // -> Current CPU clock.
 // -> Internal CPU registers.
@@ -170,6 +175,8 @@ extern void i_vector_init();
 
 extern void i_vector_print();
 
+extern void stack_pull(unsigned short* pc, unsigned short* lr, PSW* psw, CEX* cex);
+
 extern void set_priority(int new_pri);
 
-extern void supervisory_call(int vector_index);
+extern void fault(int fault_id);

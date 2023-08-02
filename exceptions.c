@@ -103,18 +103,6 @@ PSW psw_decode(unsigned short psw_unsigned)
 	return converted_psw;
 }
 
-// Sets CPU priority in PSW.
-// Throws a priority fault if trying to set to a higher priority.
-void set_priority(int new_pri)
-{
-	if (new_pri > psw.current)
-	{
-		// Throw priority fault.
-	}
-	psw.previous = psw.current;
-	psw.current = new_pri;
-}
-
 // Pushes current CPU state onto stack, then sets CPU state stored in the interrupt vector.
 // Modifies PC to the address of the interrupt handler.
 // Throws a priority fault if the SVC was called by a process with a higher priority than the interrupt handler.
@@ -127,4 +115,42 @@ void supervisory_call(int vector_index)
 	psw = psw_decode(i_vec_table[vector_index].psw);
 	PC = i_vec_table[vector_index].address;
 	LR = 0xFFFF; /* Link register is set to -1 to indicate to MOV instruction that we must pull the new link register off the stack. */
+	
+	// Clear CEX state:
+	cex.false_count = 0;
+	cex.true_count = 0;
+
+	// Check if a priority fault has occured.
+	// Occurs when the priority of the called interrupt was equal to or lower than the process that called it.
+	if (psw.current <= stack[stack_idx - 1].psw.current)
+	{
+		fault(FAULT_PRI);
+	}
+}
+
+// Wrapper for the Supervisory Call function.
+void fault(int fault_id)
+{
+	// If the PSW is already in a faulting state when the fault is called, a double fault occurs.
+	#ifdef VERBOSE
+		printf("Fault triggered!\nID: %i\n", fault_id);
+	#endif
+	if (psw.faulting)
+	{
+		fault(FAULT_DBL);
+	}
+	supervisory_call(fault_id);
+}
+
+// Sets CPU priority in PSW.
+// Throws a priority fault if trying to set to a higher priority.
+void set_priority(int new_pri)
+{
+	if (new_pri > psw.current)
+	{
+		// Throw priority fault.
+		fault(FAULT_PRI);
+	}
+	psw.previous = psw.current;
+	psw.current = new_pri;
 }

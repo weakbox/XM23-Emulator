@@ -256,9 +256,20 @@ unsigned short set_bit(unsigned short dest, unsigned short source, unsigned shor
 
 // Moves the contents of the source register into the destination register.
 // Does not modify the PSW.
+// Performs a special operation when moving the LR into the PC.
 unsigned short move(unsigned short dest, unsigned short source, unsigned short wb)
 {
 	unsigned short result = 0;
+
+	// Check for an interrupt return.
+	// Special case of MOV instruction, performs a different operation than normal.
+	if (source == LR && dest == PC && source == 0xFFFF)
+	{
+		stack_pull(&PC, &LR, &psw, &cex);
+		return PC;
+	}
+
+	// No interrupt return, proceed as normal.
 	switch (wb)
 	{
 	case WORD:

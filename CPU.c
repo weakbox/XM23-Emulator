@@ -116,8 +116,15 @@ void print_reg(unsigned short regfile[2][8])
 }
 
 // Reads the contents of a memory location as a 16-bit word and places it into the instruction register.
+// Throws a invalid address fault if the CPU attempts to fetch an odd-numbered address.
 void fetch()
 {
+    // Check if PC is invalid (odd):
+    if ((PC % 2) != 0)
+    {
+        fault(FAULT_INV_ADDR);
+    }
+
 	cpu.mar = PC;
 	cache_bus(cpu.mar, &cpu.mbr, READ, WORD);
 	cpu.ir = cpu.mbr;
@@ -679,6 +686,7 @@ void execute(unsigned short ir, unsigned short pc)
             printf("\n");
             printf("Instruction not found!\n");
         #endif
+        fault(FAULT_ILL_INST);
         break;
     }
     cpu.clock++;
