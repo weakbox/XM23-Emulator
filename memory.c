@@ -6,9 +6,9 @@
 */
 
 #include "header.h"
-#include "header_old.h"	// As this is the first program, it uses some old definitions. These should be changed.
+#include "header_old.h"	// As this is the first program, it uses some old definitions. These ideally would be migrated.
 
-// Shifts a 16-bit address value to the right by 1 bit, turning it into a 15-bit address. This process effectively divides the value of the address by 2.
+// Shifts a 16-bit address value to the right by 1 bit, turning it into a 15-bit address. This process essentially just divides the value of the address by 2.
 #define word(x) x >> 1
 
 // Emulates the CPU bus. Moves data to and from the memory address specified by the cpu.mar.
@@ -42,6 +42,7 @@ void bus(unsigned short mar, unsigned short* mbr, int rw, int wb)
 			}
 			break;
 	}
+
 	cpu.clock += 3;
 }
 
@@ -101,13 +102,14 @@ void print_mem(int start, int end)
 			count = 0;
 		}
 	}
+
 	if (count != 0)	// Append newline character if memory stopped printing halfway through a line.
 	{
 		printf("\n");
 	}
 }
 
-// Loads contents of S-Record (.xme) file into virtual memory. Returns value of the program's start address (really poorly made, needs refactoring).
+// Loads contents of S-Record (.xme) file into virtual memory. Returns value of the program's start address.
 unsigned int load_srec(FILE* file)
 {
 	// S-Record decoding and initial load of memory:
@@ -151,13 +153,13 @@ unsigned int load_srec(FILE* file)
 			return -1;
 		}
 
-		// Determine if record is a valid type and meets requcpu.irements. A record can have a length no less than 3 bytes.
+		// Determine if record is a valid type and meets requirements. A record can have a length no less than 3 bytes.
 		if (type[0] != 'S' || (type[1] != '0' && type[1] != '1' && type[1] != '9') || (len < 3 || len > 36))
 		{
 			validRecord = 0;
 		}
 
-		// If the record is a valid type and meets requcpu.irements, proceed with processing.
+		// If the record is a valid type and meets requirements, proceed with processing.
 		if (validRecord)
 		{
 			// Combine the high and low address bytes into one full address.
@@ -216,12 +218,12 @@ unsigned int load_srec(FILE* file)
 				printf("ERROR: Checksum could not be validated.\n");
 			}
 		}
-		// The record was formatted incorrectly or was of an unsupported type.
-		else
+		else // The record was formatted incorrectly or was of an unsupported type.
 		{
 			swap_newline(str);
 			printf("ERROR: The inputted record '%s' could not be initialized.\n", str);
 		}
 	}
+
 	return startAddress;
 }

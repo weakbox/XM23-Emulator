@@ -51,7 +51,7 @@ void print_controls()
 }
 
 // Opens a file provided by the user in the form of a command-line argument.
-// Fails if no file is given, file is of the wrong type, or if the file cannot be accessed.
+// -> Fails if no file is given, file is of the wrong type, or if the file cannot be accessed.
 int open_xme_file(FILE** file, int args_num, const char* file_name)
 {
 	if (args_num < 2)
@@ -84,11 +84,10 @@ void flush_buffer()
 // Handler for crtl-c detection.
 void sigint_hdlr()
 {
-	/*
-	- Invoked when SIGINT (control-C) is detected
-	- changes state of waiting_for_signal
-	- signal must be reinitialized
-	*/
+	// Invoked when SIGINT (control-C) is detected.
+	// -> changes state of waiting_for_signal.
+	// -> signal must be reinitialized.
+
 	ctrl_c_fnd = true;
 	signal(SIGINT, (_crt_signal_t)sigint_hdlr); /* Reinitialize SIGINT */
 }

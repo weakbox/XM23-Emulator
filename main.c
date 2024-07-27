@@ -34,11 +34,11 @@ int main(int argv, char* argc[])
 	printf("File opened successfully: %s\n", argc[1]);
 
 	// Load contents of .xme program file into virtual memory.
-	// This function also returns the start address of the PC.
+	// -> This function also returns the start address of the PC.
 	PC = load_srec(file);
 
 	// Instructions have been loaded into virtual memory.
-	// Initialize the CPU's internal registers.
+	// -> Initialize the CPU's internal registers.
 	initialize_cpu(&cpu);
 	cache_init(CACHE_SIZE);
 	i_vector_init();
@@ -142,6 +142,7 @@ int main(int argv, char* argc[])
 				break;
 		}
 	}
+
 	fclose(file);
 	return 0;
 }

@@ -12,7 +12,7 @@
 #include <string.h>
 #include <signal.h>
 
-// #define VERBOSE	// Can be enabled to show visual indications of events within the emulator.
+#define VERBOSE	// Enables VERBOSE mode.
 
 #define NEWLINE '\n'
 #define NUL '\0'
@@ -23,14 +23,14 @@
 #define WORD 0
 #define BYTE 1
 
-#define MEMORY_SIZE 65536	// Memory size in bytes.
+#define MEMORY_SIZE 65536	// Bytes.
 
-#define CACHE_SIZE 32
+#define CACHE_SIZE 32		// Bytes.
 
-#define BP regfile[0][4]	// R4 -> Base Pointer
-#define LR regfile[0][5]	// R5 -> Link Register
-#define SP regfile[0][6]	// R6 -> Stack Pointer
-#define PC regfile[0][7]	// R7 -> Program Counter
+#define BP regfile[0][4]	// Register 4: Base Pointer
+#define LR regfile[0][5]	// Register 5: Link Register
+#define SP regfile[0][6]	// Register 6: Stack Pointer
+#define PC regfile[0][7]	// Register 7: Program Counter
 
 #define FAULT_ILL_INST 8
 #define FAULT_INV_ADDR 9
@@ -49,7 +49,7 @@ typedef struct _CPU
 	unsigned short ir;
 }	CPU;
 
-// Stores data relevent to the operation of the PSW (retrieved from Dr. Larry Hughes).
+// Stores data relevent to the operation of the PSW.
 typedef struct _PSW
 {
 	unsigned short carry : 1;
@@ -57,10 +57,10 @@ typedef struct _PSW
 	unsigned short negative : 1;
 	unsigned short sleep : 1;
 	unsigned short overflow : 1;
-	unsigned short current : 3; /* Current priority */
-	unsigned short faulting : 1; /* 0 - No fault; 1 - Active fault */
+	unsigned short current : 3;		/* Current priority. */
+	unsigned short faulting : 1;	/* Fault status. */
 	unsigned short reserved : 4;
-	unsigned short previous : 3; /* Previous priority */
+	unsigned short previous : 3;	/* Previous priority. */
 }	PSW;
 
 // Combines word and byte addressing into a single union, allowing data to be written to a shared space in memory.
@@ -97,9 +97,9 @@ extern PSW psw;								// Global emulator PSW.
 extern Memory mem;							// Global emulator memory.
 extern CEX cex;
 extern unsigned short regfile[2][8];		// Global emulator register file.
-extern volatile sig_atomic_t ctrl_c_fnd;	// Ctrl+C signal indicator.
+extern volatile sig_atomic_t ctrl_c_fnd;	// ctrl+c signal indicator.
 
-// Functions defined in "CPU.c":
+// Functions defined in: CPU.c
 extern void				initialize_cpu(CPU* cpu);
 extern void				update_psw(unsigned short dest, unsigned short source, unsigned short result, unsigned short wb);
 extern void				print_psw();
@@ -108,14 +108,14 @@ extern void				fetch();
 extern int				decode(unsigned short ir);
 extern void				execute(unsigned short ir, unsigned short pc);
 
-// Functions defined in "memory.c":
+// Functions defined in: memory.c
 extern void				bus(unsigned short mar, unsigned short* mbr, int rw, int wb);
 extern unsigned int		mem_read(unsigned int address);
 extern void				mem_write(unsigned int address, unsigned int data);
 extern void				print_mem(int start, int end);
 extern unsigned int		load_srec(FILE* file);
 
-// Functions defined in "instructions.c":
+// Functions defined in : instructions.c
 extern void				branch_conditional(unsigned short condition, unsigned short expected, unsigned short offset);
 extern void				branch_link(unsigned short offset);
 extern unsigned short	add(unsigned short dest, unsigned short source, unsigned short carry, unsigned short wb);
@@ -143,7 +143,7 @@ extern unsigned short	move(unsigned short dest, unsigned short source, unsigned 
 extern void				load_rel(unsigned short* dest, unsigned short source, short offset, unsigned short wb);
 extern void				store_rel(unsigned short dest, unsigned short source, short offset, unsigned short wb);
 
-// Functions defined in "utils.c":
+// Functions defined in: utils.c
 extern void				close();
 extern void				appendNewline(char* str);
 extern void				swap_newline(char* str);
@@ -153,22 +153,22 @@ extern void				sigint_hdlr();
 extern void				print_controls();
 extern unsigned short	combine_bytes(unsigned short msb, unsigned short lsb);
 
-// Functions defined in "cache.c"
+// Functions defined in: cache.c
 
 // Initializes the contents of each cache line to zero.
-// Assumes initialization was successful.
+// -> Assumes initialization was successful.
 extern void cache_init(int cache_size);
 
 // Prints the contents of each cache line.
 extern void cache_print(int cache_size);
 
 // Allows the user to modify the cache organization method and the cache replacement policy settings.
-// Will reinitialize the cache if these settings have been modified.
+// -> Will reinitialize the cache if these settings have been modified.
 extern void cache_config(int org, int pol);
 
 // Searches the cache.
-// Can utilize a varity of cache organization methods based on the user input.
-// The CPU's MAR specifies the address that we are to search for.
+// -> Can utilize a varity of cache organization methods based on the user input.
+// -> The CPU's MAR specifies the address that we are to search for.
 extern void cache_bus(unsigned short mar, unsigned short* mbr, int rw, int wb);
 
 extern void i_vector_init();

@@ -50,7 +50,7 @@
 #define STR 40
 
 // Isolates specific bits present in the instruction register.
-// These definitions allow the emulator to decode the opcode present in the instruction register.
+// -> These definitions allow the emulator to decode the opcode present in the instruction register.
 #define BITS_15_AND_14(x)	((x >> 14) & 0x03)
 #define BIT_13(x)			((x >> 13) & 0x01)
 #define BITS_12_AND_11(x)	((x >> 11) & 0x03)
@@ -63,7 +63,7 @@
 #define BIT_4(x)			((x >> 4)  & 0x01)
 
 // Isolates specific bits present in the instruction register.
-// These definitions allow the emulator to extract parameters from the instruction register.
+// -> These definitions allow the emulator to extract parameters from the instruction register.
 #define OFFSET_BRANCH_LINK(x)		((x)       & 0x1FFF)
 #define OFFSET_BRANCH_COND(x)		((x)       & 0x03FF)
 #define RC(x)						((x >> 7)  & 0x01)

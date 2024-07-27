@@ -13,7 +13,7 @@
 #define OFFSET_SIGN_BIT_LOAD_STORE(x) ((x >> 13) & 1)
 
 // Adds an offset to the CPU's program counter. Stores the return address in the link register. 
-// A return can be initiated by moving the value stored in the link register to the program counter.
+// -> A return can be initiated by moving the value stored in the link register to the program counter.
 void branch_link(unsigned short offset)
 {
 	if (OFFSET_SIGN_BIT_LINK(offset)) // Sign bit it set, we have to sign extend the most significant 3 bits of the offset.
@@ -27,7 +27,7 @@ void branch_link(unsigned short offset)
 }
 
 // Adds an offset to the CPU's program counter if the condition is equal to the expected value.
-// The condition can be modified to fit all of the XM-23's conditional branch instructions.
+// -> The condition can be modified to fit all of the XM-23's conditional branch instructions.
 void branch_conditional(unsigned short condition, unsigned short expected, unsigned short offset)
 {
 	if (condition == expected)
@@ -36,6 +36,7 @@ void branch_conditional(unsigned short condition, unsigned short expected, unsig
 		{
 			offset |= 0xFC00;
 		}
+
 		offset = offset << 1;
 
 		PC += offset;
@@ -43,10 +44,11 @@ void branch_conditional(unsigned short condition, unsigned short expected, unsig
 }
 
 // Adds the destination, source, and carry bit together.
-// Returns the result of this addition, and sets the PSW bits depending on the result.
+// -> Returns the result of this addition, and sets the PSW bits depending on the result.
 unsigned short add(unsigned short dest, unsigned short source, unsigned short carry, unsigned short wb)
 {
 	unsigned short result = 0;
+
 	switch (wb)
 	{
 	case WORD:
@@ -58,6 +60,7 @@ unsigned short add(unsigned short dest, unsigned short source, unsigned short ca
 		result = combine_bytes(MSBYTE(dest), LSBYTE(dest + source + carry));
 		break;
 	}
+
 	update_psw(dest, source, result, wb);
 	return result;
 }
@@ -78,11 +81,12 @@ unsigned short bcd_arith(unsigned short nib_d, unsigned short nib_s, unsigned sh
 	{
 		*hc = 0;
 	}
+
 	return result;
 }
 
 // Performs BCD arithmetic between the destination and the source.
-// Returns the result of this addition, and sets the PSW bits depending on the result.
+// -> Returns the result of this addition, and sets the PSW bits depending on the result.
 unsigned short add_decimal(unsigned short dest, unsigned short source, unsigned short wb)
 {
 	WordNib d;
@@ -116,14 +120,16 @@ unsigned short add_decimal(unsigned short dest, unsigned short source, unsigned 
 	}
 
 	update_psw(dest, source, r.word, wb);
+
 	return r.word;
 }
 
 // Compares the values of the destination and source registers to determine if they are equal.
-// Sets the PSW bits depending on the result.
+// -> Sets the PSW bits depending on the result.
 void compare(unsigned short dest, unsigned short source, unsigned short wb)
 {
 	unsigned short result = 0;
+
 	switch (wb)
 	{
 	case WORD:
@@ -134,14 +140,16 @@ void compare(unsigned short dest, unsigned short source, unsigned short wb)
 		result = LSBYTE(dest) + ((~LSBYTE(source)) + 1);
 		break;
 	}
+
 	update_psw(dest, source, result, wb);
 }
 
 // Performs a XOR operation between the values of the desination and source registers.
-// Returns the result of this operation, and sets the PSW bits depending on the result.
+// -> Returns the result of this operation, and sets the PSW bits depending on the result.
 unsigned short xor (unsigned short dest, unsigned short source, unsigned short wb)
 {
 	unsigned short result = 0;
+
 	switch (wb)
 	{
 	case WORD:
@@ -152,15 +160,18 @@ unsigned short xor (unsigned short dest, unsigned short source, unsigned short w
 		result = combine_bytes(MSBYTE(dest), LSBYTE(dest ^ source));
 		break;
 	}
+
 	update_psw(dest, source, result, wb);
+
 	return result;
 }
 
 // Performs an AND operation between the the values of the desination and source registers.
-// Returns the result of this operation, and sets the PSW bits depending on the result.
+// -> Returns the result of this operation, and sets the PSW bits depending on the result.
 unsigned short and (unsigned short dest, unsigned short source, unsigned short wb)
 {
 	unsigned short result = 0;
+
 	switch (wb)
 	{
 	case WORD:
@@ -171,15 +182,18 @@ unsigned short and (unsigned short dest, unsigned short source, unsigned short w
 		result = combine_bytes(MSBYTE(dest), (LSBYTE(dest) & LSBYTE(source)));
 		break;
 	}
+
 	update_psw(dest, source, result, wb);
+
 	return result;
 }
 
 // Performs an OR operation between the the values of the desination and source registers.
-// Returns the result of this operation, and sets the PSW bits depending on the result.
+// -> Returns the result of this operation, and sets the PSW bits depending on the result.
 unsigned short or (unsigned short dest, unsigned short source, unsigned short wb)
 {
 	unsigned short result = 0;
+
 	switch (wb)
 	{
 	case WORD:
@@ -190,18 +204,21 @@ unsigned short or (unsigned short dest, unsigned short source, unsigned short wb
 		result = combine_bytes(MSBYTE(dest), (LSBYTE(dest) | LSBYTE(source)));
 		break;
 	}
+
 	update_psw(dest, source, result, wb);
+
 	return result;
 }
 
 // Determines whether a specific bit in the destination register is set high or low.
-// Value of the source register must indicate the bit to be compared.
-// Sets the PSW bits depending on the result.
+// -> Value of the source register must indicate the bit to be compared.
+// -> Sets the PSW bits depending on the result.
 void compare_bit(unsigned short dest, unsigned short source, unsigned short wb)
 {
 	if (dest & source)
 	{
 		psw.zero = 0;	// Clear PSW zero bit to indicate there was a bit-match.
+
 		switch (wb)
 		{
 		case WORD:
@@ -217,10 +234,11 @@ void compare_bit(unsigned short dest, unsigned short source, unsigned short wb)
 }
 
 // Clears a bit in the destination register, determined by the position indicated in the source register.
-// Returns the result of this operation, and sets the PSW's zero bit if the result of the operation was zero.
+// -> Returns the result of this operation, and sets the PSW's zero bit if the result of the operation was zero.
 unsigned short clear_bit(unsigned short dest, unsigned short source, unsigned short wb)
 {
 	unsigned short result = 0;
+
 	switch (wb)
 	{
 	case WORD:
@@ -231,15 +249,18 @@ unsigned short clear_bit(unsigned short dest, unsigned short source, unsigned sh
 		result = dest & ~(1 << source);
 		break;
 	}
+
 	psw.zero = (result == 0) ? 1 : 0;
+
 	return result;
 }
 
 // Sets a bit in the destination register, determined by the position indicated in the source register.
-// Returns the result of this operation, and clears the PSW's zero bit.
+// -> Returns the result of this operation, and clears the PSW's zero bit.
 unsigned short set_bit(unsigned short dest, unsigned short source, unsigned short wb)
 {
 	unsigned short result = 0;
+
 	switch (wb)
 	{
 	case WORD:
@@ -250,19 +271,21 @@ unsigned short set_bit(unsigned short dest, unsigned short source, unsigned shor
 		result = dest | (1 << source);
 		break;
 	}
+
 	psw.zero = 0; // Clear the PSW's zero bit.
+
 	return result;
 }
 
 // Moves the contents of the source register into the destination register.
-// Does not modify the PSW.
-// Performs a special operation when moving the LR into the PC.
+// -> Does not modify the PSW.
+// -> Performs a special operation when moving the LR into the PC.
 unsigned short move(unsigned short dest, unsigned short source, unsigned short wb)
 {
 	unsigned short result = 0;
 
 	// Check for an interrupt return.
-	// Special case of MOV instruction, performs a different operation than normal.
+	// -> Special case of MOV instruction, performs a different operation than normal.
 	if (source == LR && dest == PC && source == 0xFFFF)
 	{
 		stack_pull(&PC, &LR, &psw, &cex);
@@ -280,11 +303,12 @@ unsigned short move(unsigned short dest, unsigned short source, unsigned short w
 		result = combine_bytes(MSBYTE(dest), LSBYTE(source));	// MSB of the destination register is unchanged.
 		break;
 	}
+
 	return result;
 }
 
 // Swaps the contents of the source and destination registers.
-// Does not modify the PSW.
+// -> Does not modify the PSW.
 void swap_reg(unsigned short* dest, unsigned short* source)
 {
 	unsigned short temp;	// An internal register that is inaccessible by the programmer.
@@ -295,7 +319,7 @@ void swap_reg(unsigned short* dest, unsigned short* source)
 }
 
 // Shifts the contents of the destination register right by one bit.
-// Does not modify the value of the sign bit.
+// -> Does not modify the value of the sign bit.
 unsigned short shift(unsigned short dest, unsigned short wb)
 {
 	unsigned short result = 0;
@@ -318,12 +342,13 @@ unsigned short shift(unsigned short dest, unsigned short wb)
 		}
 		break;
 	}
+
 	return result;
 }
 
 // Shifts the contents of the destination register right by one bit.
-// Stores the current carry bit into the MSBit of the destination.
-// Stores the LSB of the destination in the carry bit.
+// -> Stores the current carry bit into the MSBit of the destination.
+// -> Stores the LSB of the destination in the carry bit.
 unsigned short rotate(unsigned short dest, unsigned short wb)
 {
 	unsigned short result = 0;
@@ -343,14 +368,16 @@ unsigned short rotate(unsigned short dest, unsigned short wb)
 		psw.carry = LSBIT_BYTE(dest);
 		break;
 	}
+
 	return result;
 }
 
 // Takes the complement of the destination register.
-// Does not modify the PSW.
+// -> Does not modify the PSW.
 unsigned short complement(unsigned short dest, unsigned short wb)
 {
 	unsigned short result = 0;
+
 	switch (wb)
 	{
 	case WORD:
@@ -361,11 +388,12 @@ unsigned short complement(unsigned short dest, unsigned short wb)
 		result = combine_bytes(MSBYTE(dest), ~LSBYTE(dest));
 		break;
 	}
+
 	return result;
 }
 
 // Swaps the most and least significant bytes in the destination register.
-// Does not modify the PSW.
+// -> Does not modify the PSW.
 unsigned short swap_byte(unsigned short dest)
 {
 	unsigned short result;
@@ -378,10 +406,11 @@ unsigned short swap_byte(unsigned short dest)
 }
 
 // Takes the most-significant bit of the least-significant byte in the destination register and sign extends it, forming a 16-bit signed quantity.
-// Does not modify the PSW.
+// -> Does not modify the PSW.
 unsigned short sign_extend(unsigned short dest)
 {
 	unsigned short result = 0;
+
 	switch (MSBIT_BYTE(LSBYTE(dest)))
 	{
 	case 0:
@@ -392,6 +421,7 @@ unsigned short sign_extend(unsigned short dest)
 		result = combine_bytes(0xFF, LSBYTE(dest));
 		break;
 	}
+
 	return result;
 }
 
@@ -431,7 +461,7 @@ void psw_mod(unsigned short psw_bits, bool clear)
 }
 
 // Sets ignored instruction flags based on the result of the evaluated condition.
-// Does not modify the PSW.
+// -> Does not modify the PSW.
 void exec_conditional(unsigned short f_count, unsigned short t_count, unsigned short code)
 {
 	unsigned short condition = -1; // -1 is uninitialized.
@@ -534,7 +564,7 @@ void exec_conditional(unsigned short f_count, unsigned short t_count, unsigned s
 }
 
 // Checks if an instruction is blocked by a CEX instruction.
-// Returns true if blocked, false if unblocked.
+// -> Returns true if blocked, false if unblocked.
 bool cex_blocking()
 {
 	// Execute only occurs if it is not blocked by a CEX instruction.
@@ -543,7 +573,9 @@ bool cex_blocking()
 		#ifdef VERBOSE
 			printf("[CEX] CEX Block!\n");
 		#endif
+
 		cex.false_count--;
+
 		return true;
 	}
 	else
@@ -552,15 +584,16 @@ bool cex_blocking()
 		{
 			cex.true_count--;
 		}
+
 		return false;
 	}
 }
 
 // Loads memory from the address specified by the source register into the destination register.
-// Can decrement/increment the destination register to allow for indexed addressing. 
+// -> Can decrement/increment the destination register to allow for indexed addressing. 
 void load(unsigned short* dest, unsigned short* source, unsigned short prpo, unsigned short dec, unsigned short inc, unsigned short wb)
 {
-	switch (prpo)	/* Determine whether to dec/inc the source register pre/post load: */
+	switch (prpo)	/* Determine whether to decrement/increment the source register pre/post load: */
 	{
 	case PRE:
 		if (wb == WORD)
@@ -603,7 +636,7 @@ void load(unsigned short* dest, unsigned short* source, unsigned short prpo, uns
 }
 
 // Stores the value of the source register into memory at the address value located in the destination register.
-// Can decrement/increment the destination register to allow for indexed addressing. 
+// -> Can decrement/increment the destination register to allow for indexed addressing. 
 void store(unsigned short* dest, unsigned short source, unsigned short prpo, unsigned short dec, unsigned short inc, unsigned short wb)
 {
 	switch (prpo)	/* Determine whether to dec/inc the source register pre/post load: */
@@ -659,13 +692,14 @@ void move_bytes(unsigned short* reg, unsigned char high, unsigned char low)
 }
 
 // Loads memory from the address specified by the source register into the destination register, but with a provided offset.
-// This offset is sign extended to ensure correct operation.
+// -> This offset is sign extended to ensure correct operation.
 void load_rel(unsigned short* dest, unsigned short source, short offset, unsigned short wb)
 {
 	if (OFFSET_SIGN_BIT_LOAD_STORE(offset)) // Sign bit it set, we have to sign extend the most significant 9 bits of the offset.
 	{
 		offset |= 0xFF80;
 	}
+
 	offset = offset << 1;
 
 	switch (wb)
@@ -685,13 +719,14 @@ void load_rel(unsigned short* dest, unsigned short source, short offset, unsigne
 }
 
 // Stores the value of the source register in memory at the address value specified by the destination register, but with a provided offset.
-// This offset is sign extended to ensure correct operation.
+// -> This offset is sign extended to ensure correct operation.
 void store_rel(unsigned short dest, unsigned short source, short offset, unsigned short wb)
 {
 	if (OFFSET_SIGN_BIT_LOAD_STORE(offset)) // Sign bit it set, we have to sign extend the most significant 9 bits of the offset.
 	{
 		offset |= 0xFF80;
 	}
+
 	offset = offset << 1;
 
 	switch (wb)

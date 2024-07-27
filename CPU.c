@@ -19,18 +19,17 @@ void initialize_cpu(CPU *cpu)
 }
 
 // Updates the Program Status Word (PSW) based on the result of execution for a particular instruction.
-// Retrieved from Dr. Larry Hughes (2023).
 void update_psw(unsigned short dest, unsigned short source, unsigned short result, unsigned short wb)
 {
 	/*
-	 - Update the PSW bits (V, N, Z, C)
-	 - Using source, dest, and result values and whether word or byte
-	 - ADD, ADDC, SUB, and SUBC
+	 - Update the PSW bits (V, N, Z, C).
+	 - Using source, dest, and result values and whether word or byte.
 	*/
+
 	unsigned short carry[2][2][2] = { 0, 0, 1, 0, 1, 0, 1, 1 };
 	unsigned short overflow[2][2][2] = { 0, 1, 0, 0, 0, 0, 1, 0 };
 
-	unsigned short mss, msd, msr; /* Most significant source, dest, and result bits */
+	unsigned short mss, msd, msr; /* Most significant source, dest, and result bits. */
 
 	if (wb == 0)
 	{
@@ -43,16 +42,19 @@ void update_psw(unsigned short dest, unsigned short source, unsigned short resul
 		mss = MSBIT_BYTE(source);
 		msd = MSBIT_BYTE(dest);
 		msr = MSBIT_BYTE(result);
-		result &= 0x00FF;	/* Mask high byte for 'z' check */
+		result &= 0x00FF;
 	}
 
-	/* Carry */
+	// Carry:
 	psw.carry = carry[mss][msd][msr];
-	/* Zero */
+
+	// Zero:
 	psw.zero = (result == 0);
-	/* Negative */
+
+	// Negative:
 	psw.negative = (msr == 1);
-	/* oVerflow */
+
+	// oVerflow:
 	psw.overflow = overflow[mss][msd][msr];
 }
 
@@ -70,7 +72,7 @@ void print_psw()
 }
 
 // Prints the contents of the register file.
-// Includes both 8 registers and 8 constants, and labels the special registers.
+// -> Includes both 8 registers and 8 constants, and labels the special registers.
 void print_reg(unsigned short regfile[2][8])
 {
 	printf("Printing register file...\n");
@@ -118,7 +120,7 @@ void print_reg(unsigned short regfile[2][8])
 }
 
 // Reads the contents of a memory location as a 16-bit word and places it into the instruction register.
-// Throws a invalid address fault if the CPU attempts to fetch an odd-numbered address.
+// -> Throws a invalid address fault if the CPU attempts to fetch an odd-numbered address.
 void fetch()
 {
     // Check if PC is invalid (odd):
@@ -135,7 +137,7 @@ void fetch()
 }
 
 // Determines the macro code of the particular instruction currently stored in the instruction register.
-// Returns an integer value that corresponds with the given instruction.
+// -> Returns an integer value that corresponds with the given instruction.
 int decode(unsigned short ir)
 {
     int inst = -1;  // If no instruction is found, this value will not change from -1 and will indicate an error.
@@ -378,15 +380,16 @@ void execute(unsigned short ir, unsigned short pc)
     int inst_code = decode(cpu.ir);
 
     // Check if instruction in IR is a branching instruction.
-    // CEX is disabled when a branching instruction is called.
+    // -> CEX is disabled when a branching instruction is called.
     if (inst_code >= BL && inst_code <= BRA)
     {
         // Branching instruction was called, disable CEX:
         cex.true_count = 0;
         cex.false_count = 0;
     }
+
     // Check if a CEX instruction is blocking the execution of instructions:
-    // Early return without executing if CEX is blocking.
+    // -> Early return without executing if CEX is blocking.
     if (cex_blocking())
     {
         return;
@@ -691,5 +694,6 @@ void execute(unsigned short ir, unsigned short pc)
         fault(FAULT_ILL_INST);
         break;
     }
+
     cpu.clock++;
 }
