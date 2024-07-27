@@ -1,0 +1,52 @@
+X-Makina Assembler - Version XM-23 Single Pass+ Assembler - Release 02.06.23
+Input file name: Dadd.asm
+Time of assembly: Wed 5 Jul 2023 19:34:26 
+  1	    	     	VAL0 equ #5321
+  2	    	     	VAL1 equ #1234
+  3	    	     	VAL2 equ #5555
+  4	    	     	VAL3 equ #0609
+  5	    	     	
+  6	    	     	org #1C06
+  7	    	     	
+  8	    	     	Start
+  9	    	     	
+ 10	1C06	6108	movl VAL0,R0
+ 11	1C08	7A98	movh VAL0,R0
+ 12	    	     	
+ 13	1C0A	61A1	movl VAL1,R1
+ 14	1C0C	7891	movh VAL1,R1
+ 15	    	     	
+ 16	1C0E	4408	dadd R1,R0	; SRC,DST Expected: R0 -> 6555
+ 17	    	     	
+ 18	1C10	62A8	movl VAL2,R0
+ 19	1C12	7AA8	movh VAL2,R0
+ 20	    	     	
+ 21	1C14	6049	movl VAL3,R1
+ 22	1C16	7831	movh VAL3,R1
+ 23	    	     	
+ 24	1C18	4408	dadd R1,R0	; Expected: R0 -> 6164
+ 25	    	     	
+ 26	1C1A	4448	dadd.b R1,R0	; Expected: R0 -> 0073
+ 27	    	     	
+ 28	    	     	end Start
+
+Successful completion of assembly - 1P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Start                              	REL	1C06	7174	PRI
+VAL3                               	CON	0609	1545	PRI
+VAL2                               	CON	5555	21845	PRI
+VAL1                               	CON	1234	4660	PRI
+VAL0                               	CON	5321	21281	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\conno\Desktop\XM-23Emulator\tests\Dadd.xme
+

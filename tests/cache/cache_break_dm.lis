@@ -1,0 +1,70 @@
+X-Makina Assembler - Version XM-23 Single Pass+ Assembler - Release 02.06.23
+Input file name: cache_break_dm.asm
+Time of assembly: Thu 27 Jul 2023 22:46:44 
+  1	    	     	; Demonstrate how direct-mapping can be very ineffective
+  2	    	     	; for a given situation.
+  3	    	     	
+  4	    	     	org	#1000
+  5	    	     	
+  6	    	     	Start
+  7	    	     	
+  8	1000	4088	add $1,R0	; This ADD instruction will constantly be overwritten in the cache due to it sharing a cache index.
+  9	1002	3C7E	bra Next1
+ 10	    	     	
+ 11	    	     	org #1100
+ 12	    	     	
+ 13	    	     	Next1
+ 14	    	     	
+ 15	1100	4088	add $1,R0
+ 16	1102	3C7E	bra Next2
+ 17	    	     	
+ 18	    	     	org #1200
+ 19	    	     	
+ 20	    	     	Next2
+ 21	    	     	
+ 22	1200	4088	add $1,R0
+ 23	1202	3C7E	bra Next3
+ 24	    	     	
+ 25	    	     	org #1300
+ 26	    	     	
+ 27	    	     	Next3
+ 28	    	     	
+ 29	1300	4088	add $1,R0
+ 30	1302	3C7E	bra Next4
+ 31	    	     	
+ 32	    	     	org #1400
+ 33	    	     	
+ 34	    	     	Next4
+ 35	    	     	
+ 36	1400	4088	add $1,R0
+ 37	1402	3C7E	bra Next5
+ 38	    	     	
+ 39	    	     	org #1500
+ 40	    	     	
+ 41	    	     	Next5
+ 42	    	     	
+ 43	1500	4088	add $1,R0
+ 44	    	     	
+ 45	    	     	end Start
+
+Successful completion of assembly - 2P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Next5                              	REL	1500	5376	PRI
+Next4                              	REL	1400	5120	PRI
+Next3                              	REL	1300	4864	PRI
+Next2                              	REL	1200	4608	PRI
+Next1                              	REL	1100	4352	PRI
+Start                              	REL	1000	4096	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\conno\Desktop\XM-23Emulator\tests\cache\cache_break_dm.xme
+

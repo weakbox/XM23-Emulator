@@ -1,0 +1,48 @@
+X-Makina Assembler - Version XM-23 Single Pass+ Assembler - Release 02.06.23
+Input file name: Cache3.asm
+Time of assembly: Thu 27 Jul 2023 18:52:32 
+  1	    	     	DATA equ #2121
+  2	    	     	ADDRW equ #2100
+  3	    	     	ADDRB equ #2200
+  4	    	     	
+  5	    	     	org #2000
+  6	    	     	
+  7	    	     	; Tests how the cache handles writes.
+  8	    	     	
+  9	    	     	Start
+ 10	    	     	
+ 11	2000	6108	movl DATA,R0
+ 12	2002	7908	movh DATA,R0
+ 13	    	     	
+ 14	2004	6001	movl ADDRW,R1
+ 15	2006	7909	movh ADDRW,R1
+ 16	    	     	
+ 17	2008	5C01	st R0,R1
+ 18	    	     	
+ 19	200A	6001	movl ADDRB,R1
+ 20	200C	7911	movh ADDRB,R1
+ 21	    	     	
+ 22	200E	5C41	st.b R0,R1
+ 23	    	     	
+ 24	2010	3FF7	bra Start
+ 25	    	     	
+ 26	    	     	end	Start
+Successful completion of assembly - 1P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Start                              	REL	2000	8192	PRI
+ADDRB                              	CON	2200	8704	PRI
+ADDRW                              	CON	2100	8448	PRI
+DATA                               	CON	2121	8481	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\conno\Desktop\XM-23Emulator\tests\Cache3.xme
+

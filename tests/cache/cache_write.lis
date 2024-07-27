@@ -1,0 +1,69 @@
+X-Makina Assembler - Version XM-23 Single Pass+ Assembler - Release 02.06.23
+Input file name: cache_write.asm
+Time of assembly: Thu 27 Jul 2023 20:47:49 
+  1	    	     	; Tests the cache's writing capabilities.
+  2	    	     	; Performs a small loop which continually performs writes at addresses that will cause
+  3	    	     	; write-back policy to trigger.
+  4	    	     	
+  5	    	     	DATA equ #2121
+  6	    	     	ADDR1 equ #2100
+  7	    	     	ADDR2 equ #2120
+  8	    	     	
+  9	    	     	org	#1000
+ 10	    	     	
+ 11	    	     	Start
+ 12	    	     	
+ 13	    	     	org #1000
+ 14	    	     	
+ 15	1000	6108	movl DATA,R0
+ 16	1002	7908	movh DATA,R0
+ 17	    	     	
+ 18	1004	6001	movl ADDR1,R1
+ 19	1006	7909	movh ADDR1,R1
+ 20	    	     	
+ 21	1008	6102	movl ADDR2,R2
+ 22	100A	790A	movh ADDR2,R2
+ 23	    	     	
+ 24	100C	3C79	bra Loop
+ 25	    	     	
+ 26	    	     	org #1100
+ 27	    	     	
+ 28	    	     	Loop
+ 29	    	     	
+ 30	1100	5C01	st R0,R1	; This write will constantly be evicted from the cache in DM mode.
+ 31	1102	5C02	st R0,R2	; This write will stay in the cache.
+ 32	    	     	
+ 33	1104	3C7D	bra Trigger
+ 34	    	     	
+ 35	    	     	org #1200
+ 36	    	     	
+ 37	    	     	Trigger
+ 38	    	     	
+ 39	1200	4088	add $1,R0	; This instruction will remove the first write from the cache when in DM mode.
+ 40	    	     				; It will also change the ascii symbol in memory.
+ 41	1202	5C02	st R0,R2	; This write will stay in the cache.
+ 42	    	     	
+ 43	1204	3F7D	bra Loop
+ 44	    	     	
+ 45	    	     	end Start
+Successful completion of assembly - 2P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Trigger                            	REL	1200	4608	PRI
+Loop                               	REL	1100	4352	PRI
+Start                              	REL	1000	4096	PRI
+ADDR2                              	CON	2120	8480	PRI
+ADDR1                              	CON	2100	8448	PRI
+DATA                               	CON	2121	8481	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\conno\Desktop\XM-23Emulator\tests\cache\cache_write.xme
+

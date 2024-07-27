@@ -1,0 +1,35 @@
+X-Makina Assembler - Version XM-23 Single Pass+ Assembler - Release 02.06.23
+Input file name: Cache1.asm
+Time of assembly: Tue 25 Jul 2023 02:35:32 
+  1	    	     	VAL0 equ #0001
+  2	    	     	
+  3	    	     	org #2000
+  4	    	     	
+  5	    	     	Start
+  6	    	     	
+  7	2000	6008	movl VAL0,R0
+  8	2002	7800	movh VAL0,R0
+  9	    	     	
+ 10	2004	4088	add $1,R0
+ 11	    	     	
+ 12	2006	3FFC	bra Start
+ 13	    	     	
+ 14	    	     	end	Start
+
+Successful completion of assembly - 1P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Start                              	REL	2000	8192	PRI
+VAL0                               	CON	0001	1	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\conno\Desktop\XM-23Emulator\tests\Cache1.xme
+

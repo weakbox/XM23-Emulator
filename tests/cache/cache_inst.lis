@@ -1,0 +1,55 @@
+X-Makina Assembler - Version XM-23 Single Pass+ Assembler - Release 02.06.23
+Input file name: cache_inst.asm
+Time of assembly: Thu 27 Jul 2023 21:59:36 
+  1	    	     	; Tests the cache's integration with previously tested instructions.
+  2	    	     	
+  3	    	     	DATA equ #2121
+  4	    	     	ADDR1 equ #2100
+  5	    	     	ADDR2 equ #2120
+  6	    	     	
+  7	    	     	org	#1000
+  8	    	     	
+  9	    	     	Start
+ 10	    	     	
+ 11	1000	6108	movl DATA,R0
+ 12	1002	7908	movh DATA,R0
+ 13	    	     	
+ 14	1004	6001	movl ADDR1,R1
+ 15	1006	7909	movh ADDR1,R1
+ 16	    	     	
+ 17	1008	6102	movl ADDR2,R2
+ 18	100A	790A	movh ADDR2,R2
+ 19	    	     	
+ 20	    	     	; Test ST instruction.
+ 21	    	     	
+ 22	100C	5C01	st R0,R1
+ 23	100E	5C42	st.b R0,R2
+ 24	    	     	
+ 25	    	     	; Test LD instruction.
+ 26	    	     	
+ 27	1010	5809	ld R1,R1
+ 28	1012	5852	ld.b R2,R2
+ 29	    	     	
+ 30	1014	3FF5	bra Start
+ 31	    	     	
+ 32	    	     	end Start
+
+Successful completion of assembly - 1P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Start                              	REL	1000	4096	PRI
+ADDR2                              	CON	2120	8480	PRI
+ADDR1                              	CON	2100	8448	PRI
+DATA                               	CON	2121	8481	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\conno\Desktop\XM-23Emulator\tests\cache\cache_inst.xme
+

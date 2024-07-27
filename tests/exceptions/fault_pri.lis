@@ -1,0 +1,100 @@
+X-Makina Assembler - Version XM-23 Single Pass+ Assembler - Release 02.06.23
+Input file name: fault_pri.asm
+Time of assembly: Tue 1 Aug 2023 21:50:03 
+  1	    	     	;	Test if the emulator successfully recognizes a priority fault.
+  2	    	     	
+  3	    	     	org #FFC0
+  4	    	     	
+  5	    	     	; Initialize the instruction vector table.
+  6	    	     	; We only really care about the priority fault vector (10).
+  7	    	     	
+  8	FFC0	0000	word #0000	; PSW
+  9	FFC2	0000	word #0000	; Addr
+ 10	    	     	
+ 11	FFC4	0020	word #0020	
+ 12	FFC6	1000	word #1000
+ 13	    	     	
+ 14	FFC8	0040	word #0040
+ 15	FFCA	2000	word #2000
+ 16	    	     	
+ 17	FFCC	0060	word #0060
+ 18	FFCE	3000	word #3000
+ 19	    	     	
+ 20	FFD0	0080	word #0080
+ 21	FFD2	4000	word #4000
+ 22	    	     	
+ 23	FFD4	00A0	word #00A0
+ 24	FFD6	5000	word #5000
+ 25	    	     	
+ 26	FFD8	00C0	word #00C0
+ 27	FFDA	6000	word #6000
+ 28	    	     	
+ 29	FFDC	00E0	word #00E0
+ 30	FFDE	7000	word #7000
+ 31	    	     	
+ 32	FFE0	00E0	word #00E0
+ 33	FFE2	8000	word #8000
+ 34	    	     	
+ 35	FFE4	00E0	word #00E0
+ 36	FFE6	9000	word #9000
+ 37	    	     	
+ 38	FFE8	00E0	word #00E0
+ 39	FFEA	A000	word #A000
+ 40	    	     	
+ 41	FFEC	00E0	word #00E0
+ 42	FFEE	B000	word #B000
+ 43	    	     	
+ 44	FFF0	00E0	word #00E0
+ 45	FFF2	C000	word #C000
+ 46	    	     	
+ 47	FFF4	00E0	word #00E0
+ 48	FFF6	D000	word #D000
+ 49	    	     	
+ 50	FFF8	00E0	word #00E0
+ 51	FFFA	E000	word #E000
+ 52	    	     	
+ 53	FFFC	00E0	word #00E0
+ 54	FFFE	F000	word #F000
+ 55	    	     	
+ 56	    	     	org #1000
+ 57	    	     	
+ 58	    	     	Start
+ 59	    	     	
+ 60	1000	4D87	setpri $7
+ 61	1002	4D96	svc $6
+ 62	    	     	
+ 63	    	     	; Create a primitive interrupt handler to document a priority fault.
+ 64	    	     	
+ 65	    	     	org #2000
+ 66	    	     	
+ 67	    	     	;	Nothing here!
+ 68	    	     	
+ 69	    	     	org #6000
+ 70	    	     	
+ 71	6000	4D92	svc $2	; This will trigger a priority fault as we are trying to trap to a process with lower priority.
+ 72	    	     	
+ 73	    	     	org #A000
+ 74	    	     	
+ 75	    	     	Interrupt_Handler
+ 76	    	     	
+ 77	A000	4288	sub $1,R0	; When we encounter the priority fault we should see #FFFF in R0.
+ 78	A002	4C2F	mov R5,R7	; Move LR into PC (interrupt return).
+ 79	    	     	
+ 80	    	     	end Start
+Successful completion of assembly - 1P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Interrupt_Handler                  	REL	A000	-24576	PRI
+Start                              	REL	1000	4096	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\conno\Desktop\XM-23Emulator\tests\exceptions\fault_pri.xme
+

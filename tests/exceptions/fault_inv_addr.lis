@@ -1,0 +1,96 @@
+X-Makina Assembler - Version XM-23 Single Pass+ Assembler - Release 02.06.23
+Input file name: fault_inv_addr.asm
+Time of assembly: Tue 1 Aug 2023 21:41:51 
+  1	    	     	;	Test if the emulator successfully recognizes an invalid address fault.
+  2	    	     	
+  3	    	     	BAD_ADDR equ #1001
+  4	    	     	
+  5	    	     	org #FFC0
+  6	    	     	
+  7	    	     	; Initialize the instruction vector table.
+  8	    	     	; We only really care about the invalid address (9).
+  9	    	     	
+ 10	FFC0	0000	word #0000	; PSW
+ 11	FFC2	0000	word #0000	; Addr
+ 12	    	     	
+ 13	FFC4	0020	word #0020	
+ 14	FFC6	1000	word #1000
+ 15	    	     	
+ 16	FFC8	0040	word #0040
+ 17	FFCA	2000	word #2000
+ 18	    	     	
+ 19	FFCC	0060	word #0060
+ 20	FFCE	3000	word #3000
+ 21	    	     	
+ 22	FFD0	0080	word #0080
+ 23	FFD2	4000	word #4000
+ 24	    	     	
+ 25	FFD4	00A0	word #00A0
+ 26	FFD6	5000	word #5000
+ 27	    	     	
+ 28	FFD8	00C0	word #00C0
+ 29	FFDA	6000	word #6000
+ 30	    	     	
+ 31	FFDC	00E0	word #00E0
+ 32	FFDE	7000	word #7000
+ 33	    	     	
+ 34	FFE0	00E0	word #00E0
+ 35	FFE2	8000	word #8000
+ 36	    	     	
+ 37	FFE4	00E0	word #00E0
+ 38	FFE6	9000	word #9000
+ 39	    	     	
+ 40	FFE8	00E0	word #00E0
+ 41	FFEA	A000	word #A000
+ 42	    	     	
+ 43	FFEC	00E0	word #00E0
+ 44	FFEE	B000	word #B000
+ 45	    	     	
+ 46	FFF0	00E0	word #00E0
+ 47	FFF2	C000	word #C000
+ 48	    	     	
+ 49	FFF4	00E0	word #00E0
+ 50	FFF6	D000	word #D000
+ 51	    	     	
+ 52	FFF8	00E0	word #00E0
+ 53	FFFA	E000	word #E000
+ 54	    	     	
+ 55	FFFC	00E0	word #00E0
+ 56	FFFE	F000	word #F000
+ 57	    	     	
+ 58	    	     	org #1000
+ 59	    	     	
+ 60	    	     	Start
+ 61	    	     	
+ 62	1000	6009	movl BAD_ADDR,R1
+ 63	1002	7881	movh BAD_ADDR,R1
+ 64	1004	4C0F	mov R1,R7	; Move an odd-numbered address into the program counter.
+ 65	    	     	
+ 66	    	     	; Create a primitive interrupt handler to document an illegal instruction.
+ 67	    	     	
+ 68	    	     	org #9000
+ 69	    	     	
+ 70	    	     	Interrupt_Handler
+ 71	    	     	
+ 72	9000	4288	sub $1,R0	; When we encounter the invalid address we should see #FFFF in R0.
+ 73	9002	4C2F	mov R5,R7	; Move LR into PC (interrupt return).
+ 74	    	     	
+ 75	    	     	end Start
+Successful completion of assembly - 1P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Interrupt_Handler                  	REL	9000	-28672	PRI
+Start                              	REL	1000	4096	PRI
+BAD_ADDR                           	CON	1001	4097	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\conno\Desktop\XM-23Emulator\tests\exceptions\fault_inv_addr.xme
+

@@ -1,0 +1,76 @@
+X-Makina Assembler - Version XM-23 Single Pass+ Assembler - Release 02.06.23
+Input file name: cache_basic.asm
+Time of assembly: Thu 27 Jul 2023 20:02:34 
+  1	    	     	; Basic test of cache.
+  2	    	     	; Provide cache with 48 instructions at unique addresses to show how instructions are placed in cache.
+  3	    	     	
+  4	    	     	org	#1000
+  5	    	     	
+  6	    	     	Start
+  7	    	     	
+  8	1000	4088	ADD $1,R0
+  9	1002	4088	ADD $1,R0
+ 10	1004	4088	ADD $1,R0
+ 11	1006	4088	ADD $1,R0
+ 12	1008	4088	ADD $1,R0
+ 13	100A	4088	ADD $1,R0
+ 14	100C	4088	ADD $1,R0
+ 15	100E	4088	ADD $1,R0
+ 16	1010	4088	ADD $1,R0
+ 17	1012	4088	ADD $1,R0
+ 18	1014	4088	ADD $1,R0
+ 19	1016	4088	ADD $1,R0
+ 20	1018	4088	ADD $1,R0
+ 21	101A	4088	ADD $1,R0
+ 22	101C	4088	ADD $1,R0
+ 23	101E	4088	ADD $1,R0
+ 24	1020	4088	ADD $1,R0
+ 25	1022	4088	ADD $1,R0
+ 26	1024	4088	ADD $1,R0
+ 27	1026	4088	ADD $1,R0
+ 28	1028	4088	ADD $1,R0
+ 29	102A	4088	ADD $1,R0
+ 30	102C	4088	ADD $1,R0
+ 31	102E	4088	ADD $1,R0
+ 32	1030	4088	ADD $1,R0
+ 33	1032	4088	ADD $1,R0
+ 34	1034	4088	ADD $1,R0
+ 35	1036	4088	ADD $1,R0
+ 36	1038	4088	ADD $1,R0
+ 37	103A	4088	ADD $1,R0
+ 38	103C	4088	ADD $1,R0
+ 39	103E	4088	ADD $1,R0
+ 40	1040	4088	ADD $1,R0
+ 41	1042	4088	ADD $1,R0
+ 42	1044	4088	ADD $1,R0
+ 43	1046	4088	ADD $1,R0
+ 44	1048	4088	ADD $1,R0
+ 45	104A	4088	ADD $1,R0
+ 46	104C	4088	ADD $1,R0
+ 47	104E	4088	ADD $1,R0
+ 48	1050	4088	ADD $1,R0
+ 49	1052	4088	ADD $1,R0
+ 50	1054	4088	ADD $1,R0
+ 51	1056	4088	ADD $1,R0
+ 52	1058	4088	ADD $1,R0
+ 53	105A	4088	ADD $1,R0
+ 54	105C	4088	ADD $1,R0
+ 55	105E	4088	ADD $1,R0
+ 56	    	     	
+ 57	    	     	end Start
+Successful completion of assembly - 1P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Start                              	REL	1000	4096	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\conno\Desktop\XM-23Emulator\tests\cache\cache_basic.xme
+

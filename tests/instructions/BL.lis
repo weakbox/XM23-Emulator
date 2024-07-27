@@ -1,0 +1,34 @@
+X-Makina Assembler - Version XM-23 Single Pass+ Assembler - Release 02.06.23
+Input file name: BL.asm
+Time of assembly: Fri 7 Jul 2023 02:07:44 
+  1	    	     	org #2000
+  2	    	     	
+  3	    	     	Start
+  4	    	     	
+  5	    	     	; Test the BL instruction:
+  6	    	     	
+  7	2000	01FF	bl Finish
+  8	    	     	
+  9	    	     	org #2400
+ 10	    	     	
+ 11	    	     	Finish
+ 12	    	     	
+ 13	    	     	end	Start
+
+Successful completion of assembly - 2P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Finish                             	REL	2400	9216	PRI
+Start                              	REL	2000	8192	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\conno\Desktop\XM-23Emulator\tests\BL.xme
+

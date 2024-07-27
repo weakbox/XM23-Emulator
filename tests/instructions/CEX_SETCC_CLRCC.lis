@@ -1,0 +1,53 @@
+X-Makina Assembler - Version XM-23 Single Pass+ Assembler - Release 02.06.23
+Input file name: CEX_SETCC_CLRCC.asm
+Time of assembly: Mon 17 Jul 2023 15:20:07 
+  1	    	     	GOOD equ #0001
+  2	    	     	BAD  equ #FFFF
+  3	    	     	
+  4	    	     	org #2000 
+  5	    	     	
+  6	    	     	Start
+  7	    	     	
+  8	    	     	; Test SETCC and CLRCC instructions:
+  9	    	     	
+ 10	2000	4DAF	SETCC CZSN	; Expected: All PSW Bits except for V should be set.
+ 11	2002	4DDC	CLRCC NVS	; Expected: All PSW bits except for C and Z should be cleared.
+ 12	    	     	
+ 13	    	     	; Test CEX instruction:
+ 14	    	     	
+ 15	2004	5152	CEX PL,$2,$2	; Expected: Successful comparasion.
+ 16	    	     	
+ 17	2006	6008	movl GOOD,R0
+ 18	2008	7800	movh GOOD,R0
+ 19	    	     	
+ 20	200A	67F8	movl BAD,R0
+ 21	200C	7FF8	movh BAD,R0
+ 22	    	     	
+ 23	200E	52D2	CEX LT,$2,$2	; Expected: Unsuccessful comparasion.
+ 24	    	     	
+ 25	2010	67F9	movl BAD,R1
+ 26	2012	7FF9	movh BAD,R1
+ 27	    	     	
+ 28	2014	6009	movl GOOD,R1
+ 29	2016	7801	movh GOOD,R1
+ 30	    	     	
+ 31	    	     	end Start
+
+Successful completion of assembly - 1P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Start                              	REL	2000	8192	PRI
+BAD                                	CON	FFFF	-1	PRI
+GOOD                               	CON	0001	1	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\conno\Desktop\XM-23Emulator\tests\CEX_SETCC_CLRCC.xme
+

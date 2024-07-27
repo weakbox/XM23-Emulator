@@ -1,0 +1,42 @@
+X-Makina Assembler - Version XM-23 Single Pass+ Assembler - Release 02.06.23
+Input file name: SraRrc.asm
+Time of assembly: Fri 7 Jul 2023 02:18:15 
+  1	    	     	VAL0 equ #0800
+  2	    	     	VAL1 equ #8001
+  3	    	     	
+  4	    	     	org #1000
+  5	    	     	
+  6	    	     	Start
+  7	    	     	
+  8	1000	6000	movl VAL0,R0
+  9	1002	7840	movh VAL0,R0
+ 10	    	     	
+ 11	1004	4D00	sra R0		; Expected: R0 -> 0400
+ 12	1006	4D40	sra.b R0 	; Expected: R0 -> 0400
+ 13	    	     	
+ 14	1008	6009	movl VAL1,R1
+ 15	100A	7C01	movh VAL1,R1
+ 16	    	     	
+ 17	100C	4D09	rrc R1		; Expected: R1 -> 4000 PSW.C -> 1
+ 18	100E	4D49	rrc.b R1	; Expected: R1 -> 4000 PSW.C -> 0
+ 19	    	     	
+ 20	    	     	end	Start
+
+Successful completion of assembly - 1P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Start                              	REL	1000	4096	PRI
+VAL1                               	CON	8001	-32767	PRI
+VAL0                               	CON	0800	2048	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\conno\Desktop\XM-23Emulator\tests\SraRrc.xme
+

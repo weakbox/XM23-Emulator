@@ -1,0 +1,107 @@
+X-Makina Assembler - Version XM-23 Single Pass+ Assembler - Release 02.06.23
+Input file name: exceptions_basic.asm
+Time of assembly: Tue 1 Aug 2023 20:50:25 
+  1	    	     	; Test if the instruction vector is correctly intialized.
+  2	    	     	; Test operation of supervisory calls.
+  3	    	     	; Test return of nested supervisory calls.
+  4	    	     	
+  5	    	     	org #FFC0
+  6	    	     	
+  7	    	     	; Initialize the worst instruction vector table ever.
+  8	    	     	
+  9	FFC0	0000	word #0000	; PSW
+ 10	FFC2	0000	word #0000	; Addr
+ 11	    	     	
+ 12	FFC4	0020	word #0020	
+ 13	FFC6	1000	word #1000
+ 14	    	     	
+ 15	FFC8	0040	word #0040
+ 16	FFCA	2000	word #2000
+ 17	    	     	
+ 18	FFCC	0060	word #0060
+ 19	FFCE	3000	word #3000
+ 20	    	     	
+ 21	FFD0	0080	word #0080
+ 22	FFD2	4000	word #4000
+ 23	    	     	
+ 24	FFD4	00A0	word #00A0
+ 25	FFD6	5000	word #5000
+ 26	    	     	
+ 27	FFD8	00C0	word #00C0
+ 28	FFDA	6000	word #6000
+ 29	    	     	
+ 30	FFDC	00E0	word #00E0
+ 31	FFDE	7000	word #7000
+ 32	    	     	
+ 33	FFE0	00E0	word #00E0
+ 34	FFE2	8000	word #8000
+ 35	    	     	
+ 36	FFE4	00E0	word #00E0
+ 37	FFE6	9000	word #9000
+ 38	    	     	
+ 39	FFE8	00E0	word #00E0
+ 40	FFEA	A000	word #A000
+ 41	    	     	
+ 42	FFEC	00E0	word #00E0
+ 43	FFEE	B000	word #B000
+ 44	    	     	
+ 45	FFF0	00E0	word #00E0
+ 46	FFF2	C000	word #C000
+ 47	    	     	
+ 48	FFF4	00E0	word #00E0
+ 49	FFF6	D000	word #D000
+ 50	    	     	
+ 51	FFF8	00E0	word #00E0
+ 52	FFFA	E000	word #E000
+ 53	    	     	
+ 54	FFFC	00E0	word #00E0
+ 55	FFFE	F000	word #F000
+ 56	    	     	
+ 57	    	     	org #1000
+ 58	    	     	
+ 59	    	     	; Try to execute an interrupt from the interrupt vector table.
+ 60	    	     	
+ 61	    	     	Start
+ 62	    	     	
+ 63	1000	4D92	svc $2		; We should move to address #2000.
+ 64	    	     	
+ 65	1002	3FFE	bra Start
+ 66	    	     	
+ 67	    	     	; Create a primitive interrupt handler.
+ 68	    	     	
+ 69	    	     	org #2000
+ 70	    	     	
+ 71	    	     	Interrupt_Handler
+ 72	    	     	
+ 73	2000	4088	add $1,R0
+ 74	2002	4088	add $1,R0
+ 75	2004	4088	add $1,R0
+ 76	2006	4D94	svc $4		; We should move to address #4000.
+ 77	2008	4C2F	mov R5,R7	; Move LR into PC (interrupt return).
+ 78	    	     	
+ 79	    	     	org #4000
+ 80	    	     	
+ 81	4000	4089	add $1,R1
+ 82	4002	4089	add $1,R1
+ 83	4004	4089	add $1,R1
+ 84	4006	4C2F	mov R5,R7	; Move LR into PC (interrupt return).
+ 85	    	     	
+ 86	    	     	end Start
+
+Successful completion of assembly - 1P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Interrupt_Handler                  	REL	2000	8192	PRI
+Start                              	REL	1000	4096	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\conno\Desktop\XM-23Emulator\tests\exceptions\exceptions_basic.xme
+

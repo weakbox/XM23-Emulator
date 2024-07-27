@@ -1,0 +1,60 @@
+X-Makina Assembler - Version XM-23 Single Pass+ Assembler - Release 02.06.23
+Input file name: CompSwpbSxt.asm
+Time of assembly: Tue 4 Jul 2023 00:11:08 
+  1	    	     	VAL0 equ #00FF
+  2	    	     	VAL1 equ #CC77
+  3	    	     	VAL2 equ #FF7F
+  4	    	     	VAL3 equ #00FA
+  5	    	     	
+  6	    	     	org #1000
+  7	    	     	
+  8	    	     	Start
+  9	    	     	
+ 10	    	     	; Move value in VAL0 into R0.
+ 11	1000	67F8	movl VAL0,R0
+ 12	1002	7800	movh VAL0,R0
+ 13	    	     	
+ 14	    	     	; Move value in VAL1 into R1.
+ 15	1004	63B9	movl VAL1,R1
+ 16	1006	7E61	movh VAL1,R1
+ 17	    	     	
+ 18	    	     	; Move value in VAL2 into R2.
+ 19	1008	63FA	movl VAL2,R2
+ 20	100A	7FFA	movh VAL2,R2
+ 21	    	     	
+ 22	    	     	; Move value in VAL3 into R3.
+ 23	100C	67D3	movl VAL3,R3
+ 24	100E	7803	movh VAL3,R3
+ 25	    	     	
+ 26	    	     	; Test the COMP instruction:
+ 27	1010	4D10	comp R0		; Expected: R0 -> FF00
+ 28	1012	4D50	comp.b R0	; Expected: R0 -> FFFF
+ 29	    	     	
+ 30	    	     	; Test the SWPB instruction:
+ 31	1014	4D19	swpb R1		; Expected: R1 -> 77CC
+ 32	    	     	
+ 33	    	     	; Test the SXT instruction:
+ 34	1016	4D22	sxt R2;		; Expected: R2 -> 007F
+ 35	1018	4D23	sxt R3;		; Expected: R2 -> FFFA
+ 36	    	     	
+ 37	    	     	end	Start
+Successful completion of assembly - 1P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Start                              	REL	1000	4096	PRI
+VAL3                               	CON	00FA	250	PRI
+VAL2                               	CON	FF7F	-129	PRI
+VAL1                               	CON	CC77	-13193	PRI
+VAL0                               	CON	00FF	255	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\conno\Desktop\XM-23 Emulator\tests\CompSwpbSxt.xme
+
