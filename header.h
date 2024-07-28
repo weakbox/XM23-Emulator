@@ -12,7 +12,7 @@
 #include <string.h>
 #include <signal.h>
 
-#define VERBOSE	// Enables VERBOSE mode.
+// #define VERBOSE	// Enables VERBOSE mode.
 
 #define NEWLINE '\n'
 #define NUL '\0'
